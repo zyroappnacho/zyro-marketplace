@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zyro Marketplace - Vista Previa Completa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* iPhone 14 Pro Max Frame */
+        .phone-frame {
+            width: 430px;
+            height: 932px;
+            background: #1d1d1f;
+            border-radius: 55px;
+            padding: 8px;
+            box-shadow: 
+                0 0 0 2px #333,
+                0 20px 60px rgba(0, 0, 0, 0.8),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 35px;
+            background: #1d1d1f;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            border-radius: 47px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            height: 54px;
+            background: #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            padding-top: 10px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* App Container */
+        .app-container {
+            height: calc(100% - 54px);
+            display: flex;
+            flex-direction: column;
+            background: #000;
+        }
+
+        /* Screen Container */
+        .screen {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            background: #000;
+            overflow-y: auto;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid #C9A961;
+            background: #000;
+        }
+
+        .logo {
+            font-family: 'Cinzel', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #C9A961;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .header-btn {
+            padding: 8px;
+            background: none;
+            border: none;
+            color: #C9A961;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .header-btn:hover {
+            background: rgba(201, 169, 97, 0.1);
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Login Screen Styles */
+        .login-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 32px;
+            background: linear-gradient(135deg, #000 0%, #111 100%);
+        }
+
+        .login-logo {
+            font-family: 'Cinzel', serif;
+            font-size: 48px;
+            font-weight: 700;
+            color: #C9A961;
+            margin-bottom: 48px;
+            text-align: center;
+        }
+
+        .role-selector {
+            width: 100%;
+            margin-bottom: 32px;
+        }
+
+        .role-option {
+            width: 100%;
+            background: #111;
+            border: 2px solid #C9A961;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .role-option:hover {
+            background: rgba(201, 169, 97, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .role-option.selected {
+            background: rgba(201, 169, 97, 0.2);
+            border-color: #D4AF37;
+        }
+
+        .role-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #C9A961;
+            margin-bottom: 8px;
+        }
+
+        .role-description {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #C9A961 0%, #D4AF37 100%);
+            color: #000;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(201, 169, 97, 0.4);
+        }
+
+        /* Menu Item Styles */
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .menu-item:hover {
+            background: #222;
+            border-color: #C9A961;
+        }
+
+        .menu-item-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-item-text {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .menu-item-icon {
+            color: #C9A961;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #111;
+            border: 1px solid #C9A961;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #C9A961;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* Campaign Card */
+        .campaign-card {
+            background: #111;
+            border: 1px solid #C9A961;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .campaign-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .campaign-title {
+            color: #C9A961;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .campaign-business {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #4CAF50;
+            color: #000;
+        }
+
+        .status-pending {
+            background: rgba(255, 152, 0, 0.2);
+            color: #FF9800;
+        }
+
+        .status-approved {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #C9A961;
+            color: #000;
+        }
+
+        .btn-outline {
+            background: #111;
+            color: #C9A961;
+            border: 1px solid #C9A961;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Role Switcher */
+        .role-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #C9A961;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .role-switch-btn {
+            background: #C9A961;
+            color: #000;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .role-switch-btn:hover {
+            background: #D4AF37;
+        }
+
+        .role-switch-btn.active {
+            background: #D4AF37;
+        }
+
+        /* Section Styles */
+        .section-title {
+            color: #C9A961;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .section-content {
+            padding: 20px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .phone-frame {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+                padding: 0;
+            }
+            
+            .phone-screen {
+                border-radius: 0;
+            }
+            
+            .phone-frame::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Role Switcher -->
+    <div class="role-switcher">
+        <div style="color: #C9A961; font-size: 12px; margin-bottom: 8px; font-weight: 600;">Cambiar Rol:</div>
+        <button class="role-switch-btn" onclick="switchRole('login')">Login</button>
+        <button class="role-switch-btn active" onclick="switchRole('influencer')">Influencer</button>
+        <button class="role-switch-btn" onclick="switchRole('company')">Empresa</button>
+        <button class="role-switch-btn" onclick="switchRole('admin')">Admin</button>
+    </div>
+
+    <div class="phone-frame">
+        <div class="phone-screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div>
+                    <span>9:41</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <span class="material-icons" style="font-size: 16px;">signal_cellular_4_bar</span>
+                    <span class="material-icons" style="font-size: 16px;">wifi</span>
+                    <span class="material-icons" style="font-size: 16px;">battery_full</span>
+                </div>
+            </div>
+
+            <div class="app-container">
+                <!-- Login Screen -->
+                <div class="screen active" id="login-screen">
+                    <div class="login-container">
+                        <div class="login-logo">ZYRO</div>
+                        <div class="role-selector">
+                            <div class="role-option selected" onclick="selectRole('influencer')">
+                                <div class="role-title">Influencer</div>
+                                <div class="role-description">Descubre colaboraciones exclusivas</div>
+                            </div>
+                            <div class="role-option" onclick="selectRole('company')">
+                                <div class="role-title">Empresa</div>
+                                <div class="role-description">Gestiona tus campañas y colaboraciones</div>
+                            </div>
+                            <div class="role-option" onclick="selectRole('admin')">
+                                <div class="role-title">Administrador</div>
+                                <div class="role-description">Control total de la plataforma</div>
+                            </div>
+                        </div>
+                        <button class="login-btn" onclick="login()">Iniciar Sesión</button>
+                    </div>
+                </div>
+
+                <!-- Company Dashboard Screen -->
+                <div class="screen" id="company-screen">
+                    <div class="header">
+                        <div class="logo">ZYRO</div>
+                        <div style="color: #C9A961; font-weight: 600;">Panel Empresa</div>
+                        <div class="header-actions">
+                            <button class="header-btn" onclick="showCompanySection('notifications')">
+                                <span class="material-icons">notifications</span>
+                            </button>
+                            <button class="header-btn" onclick="showCompanySection('settings')">
+                                <span class="material-icons">settings</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="content">
+                        <!-- Company Header -->
+                        <div style="padding: 20px; text-align: center; border-bottom: 1px solid #333;">
+                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #C9A961 0%, #D4AF37 100%); border-radius: 30px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;">
+                                <span class="material-icons" style="color: #000; font-size: 24px;">business</span>
+                            </div>
+                            <div style="color: #C9A961; font-size: 20px; font-weight: 700; margin-bottom: 4px;">Restaurante Elegance</div>
+                            <div style="color: #999; font-size: 14px; margin-bottom: 8px;">Plan Premium - 6 meses</div>
+                            <div class="status-badge status-active">ACTIVA</div>
+                        </div>
+
+                        <!-- Metrics Overview -->
+                        <div class="section-content">
+                            <div class="section-title">Resumen de Actividad</div>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-value" style="color: #4CAF50;">3</div>
+                                    <div class="stat-label">Campañas Activas</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" style="color: #FF9800;">12</div>
+                                    <div class="stat-label">Solicitudes Pendientes</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">28</div>
+                                    <div class="stat-label">Colaboraciones Aprobadas</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value" style="color: #D4AF37;">45</div>
+                                    <div class="stat-label">Completadas</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- My Campaigns -->
+                        <div style="padding: 0 20px 20px;">
+                            <div class="section-title">Mis Campañas</div>
+                            
+                            <div class="campaign-card">
+                                <div class="campaign-header">
+                                    <div>
+                                        <div class="campaign-title">Degustación Premium</div>
+                                        <div class="campaign-business">Restaurante Elegance</div>
+                                    </div>
+                                    <div class="status-badge status-active">ACTIVA</div>
+                                </div>
+                                <div style="color: #999; font-size: 12px; margin-bottom: 12px;">Min. 10K seguidores IG • +2 acompañantes</div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-primary" onclick="showCompanySection('campaign-requests')">Ver Solicitudes (8)</button>
+                                    <button class="btn btn-outline" onclick="showCompanySection('campaign-analytics')">Métricas</button>
+                                </div>
+                            </div>
+
+                            <div class="campaign-card">
+                                <div class="campaign-header">
+                                    <div>
+                                        <div class="campaign-title">Cena Romántica</div>
+                                        <div class="campaign-business">Restaurante Elegance</div>
+                                    </div>
+                                    <div class="status-badge status-active">ACTIVA</div>
+                                </div>
+                                <div style="color: #999; font-size: 12px; margin-bottom: 12px;">Min. 25K seguidores IG • +1 acompañante</div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-primary" onclick="showCompanySection('campaign-requests')">Ver Solicitudes (4)</button>
+                                    <button class="btn btn-outline" onclick="showCompanySection('campaign-analytics')">Métricas</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Influencer Requests -->
+                        <div style="padding: 0 20px 20px;">
+                            <div class="section-title">Solicitudes Recientes</div>
+                            
+                            <div style="background: #111; border: 1px solid #333; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                    <div style="color: #C9A961; font-size: 14px; font-weight: 600;">@ana_lifestyle</div>
+                                    <div class="status-badge status-pending">PENDIENTE</div>
+                                </div>
+                                <div style="color: #999; font-size: 12px; margin-bottom: 8px;">Degustación Premium • 15K seguidores IG</div>
+                                <div style="color: #999; font-size: 12px; margin-bottom: 8px;">📅 Solicitado para el 28/01/2025 a las 20:00</div>
+                                <div style="color: #999; font-size: 11px; font-style: italic;">"Me encantaría probar vuestra nueva carta de temporada y compartirlo con mi audiencia..."</div>
+                            </div>
+
+                            <div style="background: #111; border: 1px solid #333; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                    <div style="color: #C9A961; font-size: 14px; font-weight: 600;">@carlos_foodie</div>
+                                    <div class="status-badge status-approved">APROBADA</div>
+                                </div>
+                                <div style="color: #999; font-size: 12px; margin-bottom: 8px;">Cena Romántica • 32K seguidores IG</div>
+                                <div style="color: #999; font-size: 12px; margin-bottom: 8px;">📅 Confirmado para el 30/01/2025 a las 21:30</div>
+                                <div style="color: #999; font-size: 11px; font-style: italic;">"Perfecto para una velada especial con mi pareja. Gracias por la oportunidad!"</div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div style="padding: 0 20px 20px;">
+                            <div class="section-title">Acciones Rápidas</div>
+                            
+                            <div class="menu-item" onclick="showCompanySection('all-requests')">
+                                <div class="menu-item-left">
+                                    <span class="material-icons menu-item-icon">people</span>
+                                    <span class="menu-item-text">Ver Todas las Solicitudes</span>
+                                </div>
+                                <span class="material-icons" style="color: #666;">chevron_right</span>
+                            </div>
+
+                            <div class="menu-item" onclick="showCompanySection('analytics')">
+                                <div class="menu-item-left">
+                                    <span class="material-icons menu-item-icon">analytics</span>
+                                    <span class="menu-item-text">Análisis y Reportes</span>
+                                </div>
+                                <span class="material-icons" style="color: #666;">chevron_right</span>
+                            </div>
+
+                            <div class="menu-item" onclick="showCompanySection('subscription')">
+                                <div class="menu-item-left">
+                                    <span class="material-icons menu-item-icon">payment</span>
+                                    <span class="menu-item-text">Gestionar Suscripción</span>
+                                </div>
+                                <span class="material-icons" style="color: #666;">chevron_right</span>
+                            </div>
+
+                            <div class="menu-item" onclick="showCompanySection('support')">
+                                <div class="menu-item-left">
+                                    <span class="material-icons menu-item-icon">support_agent</span>
+                                    <span class="menu-item-text">Soporte y Ayuda</span>
+                                </div>
+                                <span class="material-icons" style="color: #666;">chevron_right</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Dashboard Screen -->
+                <div class="screen" id="admin-screen">
+                    <div class="header">
+                        <div class="logo">ZYRO</div>
+                        <div style="color: #C9A961; font-weight: 600;">Panel Administrador</div>
+                        <div class="header-actions">
+                            <button class="header-btn" onclick="showAdminSection('notifications')">
+                                <span class="material-icons">notifications</span>
+                                <div style="position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: #F44336; border-radius: 50%;"></div>
+                            </button>
+                            <button class="header-btn" onclick="showAdminSection('settings')">
+                                <span class="material-icons">settings</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="content">
+                        <!-- Admin Header -->
+                        <div style="padding: 20px; text-align: center; border-bottom: 1px solid #333;">
+                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #C9A961 0%, #D4AF37 100%); border-radius: 30px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;">
+                                <span class="material-icons" style="color: #000; font-size: 24px;">admin_panel_settings</span>
+                            </div>
+                            <div style="color: #C9A961; font-size: 20px; font-weight: 700; margin-bottom: 4px;">Administrador Zyro</div>
+                            <div style="color: #999; font-size: 14px;">Control total de la plataforma</div>
+                        </div>
+
+                        <!-- System Overview -->
+                        <div class="section-content">
+                            <div class="section-title">Resumen del Sistema</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                                <div style="text-align: center;">
+                                    <div style="color: #C9A961; font-size: 32px; font-weight: 700;">1,247</div>
+                                    <div style="color: #999; font-size: 12px;">Usuarios Totales</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="color: #C9A961; font-size: 32px; font-weight: 700;">89</div>
+                                    <div style="color: #999; font-size: 12px;">Empresas Activas</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="color: #C9A961; font-size: 32px; font-weight: 700;">156</div>
+                                    <div style="color: #999; font-size: 12px;">Campañas Activas</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="color: #C9A961; font-size: 32px; font-weight: 700;">€24,567</div>
+                                    <div style="color: #999; font-size: 12px;">Ingresos del Mes</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pending Approvals -->
+                        <div style="padding: 0 20px 20px;">
+                            <div class="section-title">Aprobaciones Pendientes</div>
+                            
+                            <div style="background: #111; border: 1px solid #FF9800; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                    <div>
+                                        <div style="color: #C9A961; font-size: 14px; font-weight: 600;">ana.garcia@email.com</div>
+                                        <div style="color: #999; font-size: 12px;">Influencer • 15K seguidores IG</div>
+                                    </div>
+                                    <div class="status-badge status-pending">PENDIENTE</div>
+                                </div>
+                                <div style="color: #999; font-size: 11px; margin-bottom: 12px;">Registrado hace 2 horas</div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-primary" onclick="approveUser('ana.garcia@email.com')">Aprobar</button>
+                                    <button class="btn btn-outline" onclick="rejectUser('ana.garcia@email.com')">Rechazar</button>
+                                </div>
+                            </div>
+
+                            <div style="background: #111; border: 1px solid #FF9800; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                    <div>
+                                        <div style="color: #C9A961; font-size: 14px; font-weight: 600;">Café Central Madrid</div>
+                                        <div style="color: #999; font-size: 12px;">Empresa • Plan 6 meses</div>
+                                    </div>
+                                    <div class="status-badge status-pending">PENDIENTE</div>
+                                </div>
+                                <div style="color: #999; font-size: 11px; margin-bottom: 12px;">Registrado hace 1 día</div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-primary" onclick="approveUser('Café Central Madrid')">Aprobar</button>
+                                    <button class="btn btn-outline" onclick="rejectUser('Café Central Madrid')">Rechazar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campaign Management -->
+                        <div style="padding: 0 20px 20px;">
+                            <div class="section-title">Gestión de Campañas</div>
+                            
+                            <div class="campaign-card">
+                                <div class="campaign-header">
+                                    <div>
+                                        <div class="campaign-title">Degustación Premium</div>
+                                        <div class="campaign-business">Restaurante Elegance</div>
+                                    </div>
+                                    <div class="status-badge status-active">ACTIVA</div>
+                                </div>
+                                <div style="color: #999; font-size: 12px; margin-bottom: 12px;">8 solicitudes • 3 aprobadas • Madrid</div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-primary" onclick="showAdminSection('edit-campaign')">Editar</button>
+                                    <button class="btn btn-outline" onclick="showAdminSection('campaign-stats')">Estadísticas</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Financial Dashboard -->
+                        <div style="padding: 0 20px 20px;">
+                            <div class="section-title">Dashboard Financiero</div>
+                            
+                            <div style="background: #111; border: 1px solid #C9A961; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                    <span style="color: #999;">Ingresos Mensuales:</span>
+                                    <span style="color: #4CAF50; font-weight: 600;">€24,567</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                    <span style="color: #999;">Proyección Anual:</span>
+                                    <span style="color: #C9A961; font-weight: 600;">€294,804</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                    <span style="color: #999;">Empresas Activas:</span>
+                                    <span style="color: #D4AF37; font-weight: 600;">89</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #999;">Promedio por Empresa:</span>
+                                    <span style="color: #C9A961; font-weight: 600;">€276</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Admin Actions -->
+                        <div style="padding: 0 20px 20px;">
+                            <div class="section-title">Acciones de Administrador</div>
+                            
+                            <div class="menu-item" onclick="showAdminSection('user-management')">
+                                <div class="menu-item-left">
+                                    <span class="material-icons menu-item-icon">manage_accounts</span>
+                                    <span class="menu-item-text">Gestión de Usuarios</span>
+                                </div>
+                                <span class="material-icons" style="color: #666;">chevron_right</span>
+                            </div>
+
+                            <div class="menu-item" onclick="showAdminSection('campaign-management')">
+                                <div class="menu-item-left">
+                                    <span class="material-icons menu-item-icon">campaign</span>
+                                    <span class="menu-item-text">Gestión de Campañas</span>
+                                </div>
+                                <span class="material-icons" style="color: #666;">chevron_right</span>
+                            </div>
+
+                            <div class="menu-item" onclick="showAdminSection('city-category-management')">
+                                <div class="menu-item-left">
+                                    <span class="material-icons menu-item-icon">location_city</span>
+                                    <span class="menu-item-text">Gestionar Ciudades y Categorías</span>
+                                </div>
+                                <span class="material-icons" style="color: #666;">chevron_right</span>
+                            </div>
+
+                            <div class="menu-item" onclick="showAdminSection('financial-dashboard')">
+                                <div class="menu-item-left">
+                                    <span class="material-icons menu-item-icon">account_balance</span>
+                                    <span class="menu-item-text">Dashboard Financiero Completo</span>
+                                </div>
+                                <span class="material-icons" style="color: #666;">chevron_right</span>
+                            </div>
+
+                            <div class="menu-item" onclick="showAdminSection('system-settings')">
+                                <div class="menu-item-left">
+                                    <span class="material-icons menu-item-icon">tune</span>
+                                    <span class="menu-item-text">Configuración del Sistema</span>
+                                </div>
+                                <span class="material-icons" style="color: #666;">chevron_right</span>
+                            </div>
+
+                            <div class="menu-item" onclick="showAdminSection('content-moderation')">
+                                <div class="menu-item-left">
+                                    <span class="material-icons menu-item-icon">moderation</span>
+                                    <span class="menu-item-text">Moderación de Contenido</span>
+                                </div>
+                                <span class="material-icons" style="color: #666;">chevron_right</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Influencer Home Screen (simplified for space) -->
+                <div class="screen" id="home-screen">
+                    <div class="header">
+                        <div class="logo">ZYRO</div>
+                        <select style="background: #111; border: 1px solid #C9A961; border-radius: 8px; padding: 8px 12px; color: #C9A961; font-weight: 600;">
+                            <option value="Madrid">Madrid</option>
+                            <option value="Barcelona">Barcelona</option>
+                        </select>
+                        <div class="header-actions">
+                            <button class="header-btn">
+                                <span class="material-icons">search</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="content">
+                        <div style="padding: 16px;">
+                            <select style="width: 100%; background: #111; border: 1px solid #C9A961; border-radius: 8px; padding: 12px; color: #C9A961; font-weight: 600; margin-bottom: 20px;">
+                                <option value="all">TODAS LAS CATEGORÍAS</option>
+                                <option value="gastronomia">GASTRONOMÍA</option>
+                                <option value="moda">MODA</option>
+                            </select>
+
+                            <div style="background: #111; border: 1px solid #C9A961; border-radius: 12px; margin-bottom: 24px; overflow: hidden; cursor: pointer;" onclick="showCollaborationDetail(1)">
+                                <div style="height: 180px; background: linear-gradient(135deg, #C9A961 0%, #D4AF37 100%); position: relative; display: flex; align-items: center; justify-content: center;">
+                                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0, 0, 0, 0.7); padding: 16px;">
+                                        <div style="font-size: 18px; font-weight: 700; color: #C9A961; margin-bottom: 4px;">Degustación Premium</div>
+                                        <div style="font-size: 14px; font-weight: 500; color: #fff;">Restaurante Elegance</div>
+                                    </div>
+                                    <div style="position: absolute; top: 8px; right: 8px; background: #000; border: 1px solid #C9A961; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #C9A961;">GASTRONOMÍA</div>
+                                </div>
+                                <div style="padding: 16px;">
+                                    <div style="font-size: 18px; font-weight: 600; color: #C9A961; margin-bottom: 8px;">Degustación Premium</div>
+                                    <div style="font-size: 14px; color: #999; margin-bottom: 16px; line-height: 1.4;">Experiencia gastronómica exclusiva en el corazón de Madrid. Menú degustación de 7 platos con maridaje incluido.</div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                                        <div style="display: flex; align-items: center; gap: 4px; font-size: 14px; color: #fff;">
+                                            <span class="material-icons" style="color: #C9A961;">people</span>
+                                            <span>Min. 10,000 seguidores</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 4px; font-size: 14px; color: #fff;">
+                                            <span class="material-icons" style="color: #C9A961;">group_add</span>
+                                            <span>+2 acompañantes</span>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid #666;">
+                                        <div style="display: flex; align-items: center; gap: 4px; font-size: 14px; color: #999;">
+                                            <span class="material-icons">location_on</span>
+                                            <span>Madrid</span>
+                                        </div>
+                                        <button style="background: #C9A961; color: #000; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                            Ver Detalles
+                                            <span class="material-icons">arrow_forward</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Navigation -->
+                    <div style="height: 70px; background: #111; border-top: 1px solid #C9A961; display: flex; justify-content: space-around; align-items: center; padding: 8px 0;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 8px; border-radius: 16px; color: #C9A961; background: rgba(201, 169, 97, 0.1);" onclick="showScreen('home')">
+                            <span class="material-icons" style="font-size: 24px;">home</span>
+                            <span style="font-size: 12px; font-weight: 500;">Inicio</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 8px; border-radius: 16px; color: #666;" onclick="alert('Mapa interactivo de España con ubicaciones de colaboraciones')">
+                            <span class="material-icons" style="font-size: 24px;">map</span>
+                            <span style="font-size: 12px; font-weight: 500;">Mapa</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 8px; border-radius: 16px; color: #666;" onclick="alert('Historial de colaboraciones: próximas, pasadas y canceladas')">
+                            <span class="material-icons" style="font-size: 24px;">history</span>
+                            <span style="font-size: 12px; font-weight: 500;">Historial</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 8px; border-radius: 16px; color: #666;" onclick="alert('Perfil del influencer con configuraciones completas')">
+                            <span class="material-icons" style="font-size: 24px;">person</span>
+                            <span style="font-size: 12px; font-weight: 500;">Perfil</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentRole = 'influencer';
+        let selectedRole = 'influencer';
+
+        // Role management
+        function selectRole(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.target.closest('.role-option').classList.add('selected');
+        }
+
+        function switchRole(role) {
+            currentRole = role;
+            
+            // Update role switcher buttons
+            document.querySelectorAll('.role-switch-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            if (role === 'login') {
+                showScreen('login');
+            } else if (role === 'company') {
+                showScreen('company');
+            } else if (role === 'admin') {
+                showScreen('admin');
+            } else {
+                showScreen('home');
+            }
+        }
+
+        function login() {
+            currentRole = selectedRole;
+            if (selectedRole === 'company') {
+                showScreen('company');
+            } else if (selectedRole === 'admin') {
+                showScreen('admin');
+            } else {
+                showScreen('home');
+            }
+        }
+
+        // Screen navigation
+        function showScreen(screenName) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            const targetScreen = document.getElementById(screenName + '-screen');
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+            }
+        }
+
+        // Company functions
+        function showCompanySection(section) {
+            const sections = {
+                'campaign-requests': '📋 SOLICITUDES DE CAMPAÑA\n\n• @ana_lifestyle - Degustación Premium\n  15K seguidores IG • Pendiente\n  Fecha: 28/01/2025 20:00\n\n• @carlos_foodie - Cena Romántica\n  32K seguidores IG • Aprobada\n  Fecha: 30/01/2025 21:30\n\n• @maria_food - Degustación Premium\n  8K seguidores IG • Rechazada\n  Motivo: No cumple requisitos mínimos',
+                
+                'campaign-analytics': '📊 MÉTRICAS DE CAMPAÑA\n\n📈 Degustación Premium:\n• Alcance total: 245K impresiones\n• Engagement: 8.5% promedio\n• Solicitudes: 12 total\n• Aprobadas: 8 (67%)\n• Completadas: 5 (62%)\n\n💰 ROI Estimado:\n• Inversión: €0 (solo producto)\n• Valor publicitario: €3,200\n• ROI: ∞ (inversión cero)',
+                
+                'all-requests': '👥 TODAS LAS SOLICITUDES\n\n🟡 Pendientes (12):\n• @ana_lifestyle - Degustación Premium\n• @foodie_madrid - Cena Romántica\n• @lifestyle_sara - Degustación Premium\n\n🟢 Aprobadas (28):\n• @carlos_foodie - Cena Romántica\n• @madrid_eats - Degustación Premium\n\n🔴 Rechazadas (8):\n• @small_account - No cumple requisitos\n• @fake_influencer - Perfil sospechoso',
+                
+                'analytics': '📊 ANÁLISIS COMPLETO\n\n📈 Rendimiento General:\n• Total colaboraciones: 48\n• Tasa de éxito: 85%\n• Alcance promedio: 25K por post\n• Engagement promedio: 7.2%\n\n🎯 Audiencia Alcanzada:\n• Edad 18-24: 35%\n• Edad 25-34: 45%\n• Edad 35-44: 20%\n\n📍 Ubicaciones:\n• Madrid: 78%\n• Otras ciudades: 22%',
+                
+                'subscription': '💳 GESTIÓN DE SUSCRIPCIÓN\n\n📋 Plan Actual:\n• Plan Premium - 6 meses\n• Precio: €399/mes\n• Próximo cobro: 15/02/2025\n• Estado: Activa\n\n💰 Historial de Pagos:\n• Enero 2025: €399 ✅\n• Diciembre 2024: €399 ✅\n• Noviembre 2024: €399 ✅\n\n⚙️ Opciones:\n• Cambiar plan\n• Actualizar método de pago\n• Cancelar suscripción',
+                
+                'support': '🆘 SOPORTE Y AYUDA\n\n📞 Contacto Directo:\n• Chat con administrador\n• Email: soporte@zyro.es\n• Teléfono: +34 900 123 456\n\n📚 Recursos:\n• Guía de uso para empresas\n• Mejores prácticas\n• Casos de éxito\n\n🔧 Problemas Comunes:\n• Gestión de solicitudes\n• Configuración de campañas\n• Facturación y pagos',
+                
+                'notifications': '🔔 NOTIFICACIONES\n\n🆕 Nuevas (3):\n• Nueva solicitud de @ana_lifestyle\n• Colaboración completada por @carlos_foodie\n• Recordatorio: Próximo pago 15/02\n\n📋 Anteriores:\n• Campaña "Degustación Premium" activada\n• 5 nuevas solicitudes esta semana\n• Informe mensual disponible',
+                
+                'settings': '⚙️ CONFIGURACIÓN EMPRESA\n\n🏢 Información del Negocio:\n• Nombre: Restaurante Elegance\n• CIF: B12345678\n• Dirección: Calle Mayor 123, Madrid\n\n👤 Contacto:\n• Email: info@elegance.es\n• Teléfono: +34 911 234 567\n• Persona de contacto: María González\n\n🔐 Seguridad:\n• Cambiar contraseña\n• Autenticación de dos factores\n• Historial de accesos'
+            };
+            
+            alert(sections[section] || 'Sección en desarrollo');
+        }
+
+        // Admin functions
+        function showAdminSection(section) {
+            const sections = {
+                'user-management': '👥 GESTIÓN DE USUARIOS\n\n📊 Estadísticas:\n• Total usuarios: 1,247\n• Influencers activos: 892\n• Empresas activas: 89\n• Pendientes aprobación: 15\n\n🔍 Filtros Disponibles:\n• Por rol (Influencer/Empresa)\n• Por estado (Activo/Pendiente/Suspendido)\n• Por ciudad\n• Por fecha de registro\n\n⚡ Acciones Masivas:\n• Aprobar múltiples usuarios\n• Enviar notificaciones\n• Exportar datos',
+                
+                'campaign-management': '📋 GESTIÓN DE CAMPAÑAS\n\n📈 Estadísticas:\n• Campañas activas: 156\n• Borradores: 23\n• Completadas: 1,234\n• Solicitudes pendientes: 89\n\n🛠️ Herramientas:\n• Crear nueva campaña\n• Editor visual avanzado\n• Configurar requisitos\n• Gestionar ubicaciones\n\n📊 Métricas:\n• Tasa de éxito: 78%\n• Promedio solicitudes: 12 por campaña\n• Tiempo medio aprobación: 2.3 días',
+                
+                'city-category-management': '🏙️ GESTIÓN DE CIUDADES Y CATEGORÍAS\n\n📍 Ciudades Habilitadas:\n• Madrid (156 campañas)\n• Barcelona (89 campañas)\n• Valencia (45 campañas)\n• Sevilla (23 campañas)\n• Bilbao (12 campañas)\n\n🏷️ Categorías Activas:\n• Gastronomía (45%)\n• Moda (20%)\n• Belleza (15%)\n• Tecnología (8%)\n• Viajes (7%)\n• Otros (5%)\n\n⚙️ Configuración:\n• Añadir nuevas ciudades\n• Crear categorías personalizadas\n• Establecer límites por zona',
+                
+                'financial-dashboard': '💰 DASHBOARD FINANCIERO COMPLETO\n\n📊 Ingresos Detallados:\n• Enero 2025: €24,567\n• Diciembre 2024: €23,890\n• Noviembre 2024: €22,345\n• Crecimiento mensual: +2.8%\n\n💳 Por Tipo de Plan:\n• Plan 12 meses (€299): 45 empresas\n• Plan 6 meses (€399): 32 empresas\n• Plan 3 meses (€499): 12 empresas\n\n📈 Proyecciones:\n• Ingresos anuales: €294,804\n• Crecimiento esperado: +15%\n• Nuevas empresas/mes: 8-12',
+                
+                'system-settings': '⚙️ CONFIGURACIÓN DEL SISTEMA\n\n🔧 Parámetros Globales:\n• Límite solicitudes por influencer: 5/mes\n• Tiempo máximo respuesta: 48h\n• Requisitos mínimos seguidores: 1K\n\n💳 Configuración de Pagos:\n• Cuenta empresarial: ES76 1234 5678 9012 3456\n• Procesador: Stripe\n• Comisiones: 0% (suscripción fija)\n\n📧 Notificaciones:\n• Email automático activado\n• Push notifications habilitadas\n• Recordatorios de pago: 7 días antes',
+                
+                'content-moderation': '🛡️ MODERACIÓN DE CONTENIDO\n\n🔍 Revisiones Pendientes:\n• 12 campañas nuevas\n• 8 perfiles de influencer\n• 3 reportes de contenido\n\n📋 Criterios de Moderación:\n• Contenido apropiado\n• Información veraz\n• Cumplimiento legal\n• Calidad de imágenes\n\n⚡ Acciones Disponibles:\n• Aprobar/Rechazar contenido\n• Solicitar modificaciones\n• Suspender cuentas\n• Generar reportes',
+                
+                'edit-campaign': '✏️ EDITOR DE CAMPAÑAS\n\n📝 Información Básica:\n• Título: Degustación Premium\n• Empresa: Restaurante Elegance\n• Categoría: Gastronomía\n• Ciudad: Madrid\n\n🎯 Requisitos:\n• Min. seguidores IG: 10,000\n• Max. acompañantes: 2\n• Contenido requerido: 2 stories IG\n\n📸 Multimedia:\n• 5 imágenes subidas\n• Video promocional: Sí\n• Galería del local: Completa',
+                
+                'campaign-stats': '📊 ESTADÍSTICAS DE CAMPAÑA\n\n📈 Rendimiento:\n• Visualizaciones: 45,678\n• Solicitudes: 23\n• Aprobadas: 8 (35%)\n• Completadas: 5 (62%)\n\n👥 Influencers Participantes:\n• @carlos_foodie (32K) - Completada\n• @madrid_eats (28K) - En proceso\n• @ana_lifestyle (15K) - Aprobada\n\n💡 Insights:\n• Mejor día: Viernes\n• Mejor hora: 20:00-22:00\n• Engagement promedio: 8.5%',
+                
+                'notifications': '🔔 NOTIFICACIONES ADMIN\n\n🚨 Urgentes (3):\n• Pago fallido: Café Central\n• Reporte de contenido inapropiado\n• Sistema de backup completado\n\n📋 Recientes:\n• 5 nuevos registros de influencers\n• 2 empresas renovaron suscripción\n• Campaña "Cena Romántica" completada\n\n⚙️ Configuración:\n• Frecuencia de notificaciones\n• Tipos de alertas\n• Canales de comunicación',
+                
+                'settings': '⚙️ CONFIGURACIÓN ADMINISTRADOR\n\n👤 Perfil Admin:\n• Usuario: admin_zyrovip\n• Último acceso: Hoy 09:15\n• Permisos: Control total\n\n🔐 Seguridad:\n• Autenticación 2FA: Activada\n• Sesiones activas: 2\n• Intentos fallidos: 0\n\n🛠️ Herramientas:\n• Backup automático: Diario\n• Logs del sistema: 30 días\n• Monitoreo: Activo 24/7'
+            };
+            
+            alert(sections[section] || 'Sección en desarrollo');
+        }
+
+        // User approval functions
+        function approveUser(userEmail) {
+            alert(`✅ USUARIO APROBADO\n\n👤 ${userEmail}\n\n✉️ Notificación enviada:\n"¡Felicidades! Tu cuenta ha sido aprobada. Ya puedes acceder a todas las funcionalidades de Zyro."\n\n📧 Email de confirmación enviado\n📱 Notificación push enviada\n\n🎉 El usuario ya puede iniciar sesión y usar la plataforma completa.`);
+        }
+
+        function rejectUser(userEmail) {
+            alert(`❌ USUARIO RECHAZADO\n\n👤 ${userEmail}\n\n✉️ Notificación enviada:\n"Tu solicitud de registro ha sido rechazada. Por favor, contacta con soporte para más información."\n\n📧 Email explicativo enviado\n📱 Notificación push enviada\n\n📋 Motivos comunes:\n• No cumple requisitos mínimos\n• Información incompleta\n• Perfil sospechoso`);
+        }
+
+        // Collaboration detail function
+        function showCollaborationDetail(id) {
+            alert(`🎯 DETALLES DE COLABORACIÓN\n\n📍 Degustación Premium\n🏢 Restaurante Elegance\n📝 Experiencia gastronómica exclusiva en el corazón de Madrid. Menú degustación de 7 platos con maridaje incluido.\n\n✅ QUÉ INCLUYE:\n• Menú degustación completo (7 platos)\n• Maridaje de vinos premium\n• Postre especial de la casa\n• Café y petit fours\n\n📱 CONTENIDO A PUBLICAR:\n• 2 historias de Instagram (1 en video)\n• Plazo: 72 horas después de la visita\n• Mencionar @restaurante_elegance\n• Usar hashtag #DegustacionPremium\n\n👥 REQUISITOS:\n• Mínimo 10,000 seguidores en Instagram\n• Contenido gastronómico previo\n• Perfil público y activo\n\n📍 UBICACIÓN:\nCalle Mayor 123, Madrid\n📅 Disponibilidad: Lunes a Domingo\n🕐 Horarios: 13:00-16:00 y 20:00-23:30\n\n💡 En la app real, aquí se abriría una pantalla completa con:\n• Galería de fotos del restaurante\n• Calendario para reservar fecha\n• Chat directo con la empresa\n• Botón de solicitar colaboración\n• Mapa con ubicación exacta`);
+        }
+
+        // Add touch feedback
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('button, .menu-item, .role-option, .campaign-card').forEach(element => {
+                element.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                    this.style.transition = 'transform 0.1s ease';
+                });
+                
+                element.addEventListener('touchend', function() {
+                    this.style.transform = 'scale(1)';
+                });
+                
+                element.addEventListener('mousedown', function() {
+                    this.style.transform = 'scale(0.98)';
+                    this.style.transition = 'transform 0.1s ease';
+                });
+                
+                element.addEventListener('mouseup', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+        });
+
+        // Simulate haptic feedback
+        function simulateHaptic() {
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        document.addEventListener('click', simulateHaptic);
+    </script>
+</body>
+</html>

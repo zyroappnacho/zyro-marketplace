@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zyro Marketplace - Mapas Interactivos</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000000;
+            color: #FFFFFF;
+            overflow: hidden;
+        }
+
+        /* Leaflet custom styles */
+        .custom-marker {
+            background: transparent !important;
+            border: none !important;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: #111111 !important;
+            color: #C9A961 !important;
+            border-radius: 8px !important;
+            border: 1px solid #C9A961 !important;
+        }
+
+        .leaflet-popup-content {
+            margin: 0 !important;
+            line-height: 1.4 !important;
+        }
+
+        .leaflet-popup-tip {
+            background: #111111 !important;
+            border: 1px solid #C9A961 !important;
+        }
+
+        .leaflet-control-zoom a {
+            background-color: #111111 !important;
+            border: 1px solid #C9A961 !important;
+            color: #C9A961 !important;
+        }
+
+        .leaflet-control-zoom a:hover {
+            background-color: #C9A961 !important;
+            color: #000000 !important;
+        }
+
+        .leaflet-control-attribution {
+            background-color: rgba(17, 17, 17, 0.8) !important;
+            color: #C9A961 !important;
+            border: 1px solid #C9A961 !important;
+            border-radius: 4px !important;
+        }
+
+        .leaflet-control-attribution a {
+            color: #C9A961 !important;
+        }
+
+        .leaflet-container {
+            background: #000000 !important;
+        }
+
+        .leaflet-tile {
+            filter: brightness(0.8) contrast(1.2) !important;
+        }
+
+        /* App container */
+        .app-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #000000;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: #111111;
+            border-bottom: 1px solid #C9A961;
+            z-index: 1000;
+        }
+
+        .zyro-logo {
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            font-size: 24px;
+            color: #C9A961;
+            letter-spacing: 3px;
+            display: flex;
+            align-items: center;
+        }
+
+        .atom {
+            width: 24px;
+            height: 24px;
+            position: relative;
+            margin-left: 8px;
+        }
+
+        .atom-nucleus {
+            width: 6px;
+            height: 6px;
+            background: #C9A961;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .atom-orbit {
+            position: absolute;
+            border: 1px solid #C9A961;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .orbit-1 { width: 24px; height: 24px; }
+        .orbit-2 { width: 18px; height: 18px; transform: translate(-50%, -50%) rotate(60deg); }
+        .orbit-3 { width: 12px; height: 12px; transform: translate(-50%, -50%) rotate(120deg); }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .control-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #000000;
+            border: 1px solid #C9A961;
+            border-radius: 8px;
+            color: #C9A961;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .control-button:hover {
+            background: #C9A961;
+            color: #000000;
+        }
+
+        /* Filters */
+        .filters-container {
+            background: #111111;
+            padding: 16px 24px;
+            border-bottom: 1px solid #333333;
+            display: none;
+        }
+
+        .filters-container.show {
+            display: block;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            color: #C9A961;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .filter-select {
+            background: #000000;
+            border: 1px solid #C9A961;
+            border-radius: 6px;
+            color: #C9A961;
+            padding: 8px 12px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(201, 169, 97, 0.3);
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            position: relative;
+        }
+
+        .map-section {
+            flex: 1;
+            position: relative;
+        }
+
+        .list-section {
+            width: 400px;
+            background: #000000;
+            border-left: 1px solid #333333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            color: #C9A961;
+            font-size: 18px;
+            font-weight: 700;
+            padding: 16px;
+            border-bottom: 1px solid #333333;
+        }
+
+        .campaigns-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Campaign cards */
+        .campaign-card {
+            background: #111111;
+            margin: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid #333333;
+            overflow: hidden;
+            display: flex;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .campaign-card:hover {
+            border-color: #C9A961;
+            background: rgba(201, 169, 97, 0.1);
+        }
+
+        .campaign-card.selected {
+            border-color: #C9A961;
+            background: rgba(201, 169, 97, 0.1);
+        }
+
+        .category-indicator {
+            width: 4px;
+            background: #C9A961;
+        }
+
+        .campaign-content {
+            flex: 1;
+            padding: 16px;
+        }
+
+        .campaign-title {
+            color: #C9A961;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .campaign-subtitle {
+            color: #FFFFFF;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        .campaign-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-text {
+            color: #CCCCCC;
+            font-size: 12px;
+        }
+
+        .followers-text {
+            color: #999999;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .view-button {
+            background: #C9A961;
+            border-radius: 6px;
+            padding: 6px 12px;
+            color: #000000;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .view-button:hover {
+            background: #A68B47;
+        }
+
+        /* Results counter */
+        .results-counter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            background: #111111;
+            border-top: 1px solid #333333;
+            gap: 8px;
+        }
+
+        .results-text {
+            color: #C9A961;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Map info overlay */
+        .map-info {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            background: #000000;
+            border: 1px solid #C9A961;
+            border-radius: 8px;
+            padding: 12px;
+            z-index: 1000;
+        }
+
+        .map-info-text {
+            color: #C9A961;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .map-info-subtext {
+            color: #CCCCCC;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        /* Loading */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #000000;
+        }
+
+        .loading-text {
+            color: #C9A961;
+            font-size: 16px;
+            font-weight: 500;
+            margin-top: 16px;
+        }
+
+        .spinner {
+            border: 3px solid #333;
+            border-top: 3px solid #C9A961;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .list-section {
+                width: 100%;
+                height: 300px;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="zyro-logo">
+                ZYR
+                <div class="atom">
+                    <div class="atom-nucleus"></div>
+                    <div class="atom-orbit orbit-1"></div>
+                    <div class="atom-orbit orbit-2"></div>
+                    <div class="atom-orbit orbit-3"></div>
+                </div>
+            </div>
+            <div class="header-controls">
+                <div class="control-button" onclick="toggleFilters()">
+                    <span class="material-icons">filter_list</span>
+                    Filtros
+                </div>
+                <div class="control-button" onclick="refreshCampaigns()">
+                    <span class="material-icons">refresh</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-container" id="filters">
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label class="filter-label">Ciudad:</label>
+                    <select class="filter-select" id="cityFilter" onchange="filterCampaigns()">
+                        <option value="TODAS LAS CIUDADES">TODAS LAS CIUDADES</option>
+                        <option value="MADRID" selected>MADRID</option>
+                        <option value="BARCELONA">BARCELONA</option>
+                        <option value="VALENCIA">VALENCIA</option>
+                        <option value="SEVILLA">SEVILLA</option>
+                        <option value="BILBAO">BILBAO</option>
+                        <option value="MÁLAGA">MÁLAGA</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label">Categoría:</label>
+                    <select class="filter-select" id="categoryFilter" onchange="filterCampaigns()">
+                        <option value="TODAS LAS CATEGORÍAS" selected>TODAS LAS CATEGORÍAS</option>
+                        <option value="RESTAURANTES">RESTAURANTES</option>
+                        <option value="MOVILIDAD">MOVILIDAD</option>
+                        <option value="ROPA">ROPA</option>
+                        <option value="EVENTOS">EVENTOS</option>
+                        <option value="DELIVERY">DELIVERY</option>
+                        <option value="SALUD Y BELLEZA">SALUD Y BELLEZA</option>
+                        <option value="ALOJAMIENTO">ALOJAMIENTO</option>
+                        <option value="DISCOTECAS">DISCOTECAS</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Map Section -->
+            <div class="map-section">
+                <div id="map" style="width: 100%; height: 100%;"></div>
+                <div class="map-info">
+                    <div class="map-info-text" id="mapInfoText">Cargando colaboraciones...</div>
+                    <div class="map-info-subtext" id="mapInfoSubtext"></div>
+                </div>
+            </div>
+
+            <!-- List Section -->
+            <div class="list-section">
+                <div class="section-title" id="sectionTitle">Colaboraciones (0)</div>
+                <div class="campaigns-list" id="campaignsList">
+                    <!-- Campaign cards will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Counter -->
+        <div class="results-counter">
+            <span class="material-icons" style="color: #C9A961;">place</span>
+            <span class="results-text" id="resultsText">0 de 0 colaboraciones</span>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // Mock data for campaigns
+        const mockCampaigns = [
+            {
+                id: '1',
+                businessName: 'La Terraza Premium',
+                title: 'Cena Gourmet para Influencers',
+                city: 'MADRID',
+                category: 'restaurantes',
+                coordinates: { lat: 40.4168, lng: -3.7038 },
+                requirements: { minInstagramFollowers: 5000, maxCompanions: 2 },
+                description: 'Experiencia gastronómica única en el corazón de Madrid'
+            },
+            {
+                id: '2',
+                businessName: 'Spa Wellness Center',
+                title: 'Sesión de Relajación Completa',
+                city: 'MADRID',
+                category: 'salud-belleza',
+                coordinates: { lat: 40.4200, lng: -3.7100 },
+                requirements: { minInstagramFollowers: 10000, maxCompanions: 1 },
+                description: 'Tratamiento de spa completo con productos premium'
+            },
+            {
+                id: '3',
+                businessName: 'Fashion Boutique',
+                title: 'Colección Primavera 2024',
+                city: 'BARCELONA',
+                category: 'ropa',
+                coordinates: { lat: 41.3851, lng: 2.1734 },
+                requirements: { minInstagramFollowers: 15000, maxCompanions: 0 },
+                description: 'Últimas tendencias en moda sostenible'
+            },
+            {
+                id: '4',
+                businessName: 'Club Nocturno Elite',
+                title: 'Noche VIP de Fin de Semana',
+                city: 'VALENCIA',
+                category: 'discotecas',
+                coordinates: { lat: 39.4699, lng: -0.3763 },
+                requirements: { minInstagramFollowers: 8000, maxCompanions: 3 },
+                description: 'Experiencia VIP en el club más exclusivo de Valencia'
+            },
+            {
+                id: '5',
+                businessName: 'Restaurante Andaluz',
+                title: 'Degustación de Tapas Tradicionales',
+                city: 'SEVILLA',
+                category: 'restaurantes',
+                coordinates: { lat: 37.3891, lng: -5.9845 },
+                requirements: { minInstagramFollowers: 3000, maxCompanions: 2 },
+                description: 'Auténtica cocina andaluza en ambiente tradicional'
+            }
+        ];
+
+        let map;
+        let markers = [];
+        let filteredCampaigns = [...mockCampaigns];
+        let selectedCampaign = null;
+
+        // Category colors
+        const categoryColors = {
+            'restaurantes': '#FF6B6B',
+            'movilidad': '#4ECDC4',
+            'ropa': '#45B7D1',
+            'eventos': '#96CEB4',
+            'delivery': '#FFEAA7',
+            'salud-belleza': '#DDA0DD',
+            'alojamiento': '#98D8C8',
+            'discotecas': '#F7DC6F'
+        };
+
+        // Initialize map
+        function initMap() {
+            map = L.map('map').setView([40.4168, -3.7038], 6);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            updateMapMarkers();
+        }
+
+        // Create custom marker icon
+        function createMarkerIcon(category, isSelected = false) {
+            const color = categoryColors[category] || '#C9A961';
+            const strokeColor = isSelected ? '#C9A961' : '#FFFFFF';
+            const strokeWidth = isSelected ? 3 : 2;
+
+            const svgIcon = `
+                <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="12" fill="${color}" stroke="${strokeColor}" stroke-width="${strokeWidth}"/>
+                    <circle cx="16" cy="16" r="6" fill="#FFFFFF" opacity="0.8"/>
+                </svg>
+            `;
+
+            return L.divIcon({
+                html: svgIcon,
+                className: 'custom-marker',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
+        }
+
+        // Update map markers
+        function updateMapMarkers() {
+            // Clear existing markers
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+
+            // Add new markers
+            filteredCampaigns.forEach(campaign => {
+                const isSelected = selectedCampaign && selectedCampaign.id === campaign.id;
+                const marker = L.marker([campaign.coordinates.lat, campaign.coordinates.lng], {
+                    icon: createMarkerIcon(campaign.category, isSelected)
+                }).addTo(map);
+
+                marker.bindPopup(`
+                    <div style="color: #C9A961; font-weight: bold; margin-bottom: 8px;">
+                        ${campaign.businessName}
+                    </div>
+                    <div style="color: #333; margin-bottom: 8px;">
+                        ${campaign.title}
+                    </div>
+                    <div style="color: #666; font-size: 12px; margin-bottom: 8px;">
+                        📍 ${campaign.city} • 👥 Min. ${campaign.requirements.minInstagramFollowers.toLocaleString()} seguidores
+                    </div>
+                    <button onclick="selectCampaign('${campaign.id}')" style="
+                        background: #C9A961; 
+                        color: #000; 
+                        border: none; 
+                        padding: 6px 12px; 
+                        border-radius: 4px; 
+                        cursor: pointer;
+                        font-weight: 600;
+                    ">Ver Detalles</button>
+                `);
+
+                marker.on('click', () => {
+                    selectCampaign(campaign.id);
+                });
+
+                markers.push(marker);
+            });
+        }
+
+        // Select campaign
+        function selectCampaign(campaignId) {
+            selectedCampaign = filteredCampaigns.find(c => c.id === campaignId);
+            updateMapMarkers();
+            updateCampaignsList();
+            
+            if (selectedCampaign) {
+                map.setView([selectedCampaign.coordinates.lat, selectedCampaign.coordinates.lng], 14);
+            }
+        }
+
+        // Update campaigns list
+        function updateCampaignsList() {
+            const listContainer = document.getElementById('campaignsList');
+            const sectionTitle = document.getElementById('sectionTitle');
+            
+            sectionTitle.textContent = `Colaboraciones (${filteredCampaigns.length})`;
+            
+            listContainer.innerHTML = filteredCampaigns.map(campaign => `
+                <div class="campaign-card ${selectedCampaign && selectedCampaign.id === campaign.id ? 'selected' : ''}" 
+                     onclick="selectCampaign('${campaign.id}')">
+                    <div class="category-indicator" style="background-color: ${categoryColors[campaign.category] || '#C9A961'};"></div>
+                    <div class="campaign-content">
+                        <div class="campaign-title">${campaign.businessName}</div>
+                        <div class="campaign-subtitle">${campaign.title}</div>
+                        <div class="campaign-details">
+                            <div class="detail-row">
+                                <span class="material-icons" style="font-size: 14px; color: #C9A961;">location_on</span>
+                                <span class="detail-text">${campaign.city}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="material-icons" style="font-size: 14px; color: #C9A961;">restaurant</span>
+                                <span class="detail-text">${campaign.category.toUpperCase()}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="followers-text">Min. ${campaign.requirements.minInstagramFollowers.toLocaleString()} seguidores</span>
+                            </div>
+                        </div>
+                        <button class="view-button" onclick="viewCampaignDetails('${campaign.id}')">Ver Detalles</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filter campaigns
+        function filterCampaigns() {
+            const cityFilter = document.getElementById('cityFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            filteredCampaigns = mockCampaigns.filter(campaign => {
+                const cityMatch = cityFilter === 'TODAS LAS CIUDADES' || campaign.city === cityFilter;
+                const categoryMatch = categoryFilter === 'TODAS LAS CATEGORÍAS' || 
+                                    campaign.category === categoryFilter.toLowerCase().replace(' y ', '-').replace(' ', '-');
+                return cityMatch && categoryMatch;
+            });
+
+            updateMapMarkers();
+            updateCampaignsList();
+            updateResultsCounter();
+            updateMapInfo();
+
+            // Adjust map view based on filtered campaigns
+            if (filteredCampaigns.length > 0) {
+                const bounds = L.latLngBounds(filteredCampaigns.map(c => [c.coordinates.lat, c.coordinates.lng]));
+                map.fitBounds(bounds, { padding: [20, 20] });
+            }
+        }
+
+        // Update results counter
+        function updateResultsCounter() {
+            const resultsText = document.getElementById('resultsText');
+            resultsText.textContent = `${filteredCampaigns.length} de ${mockCampaigns.length} colaboraciones`;
+        }
+
+        // Update map info
+        function updateMapInfo() {
+            const mapInfoText = document.getElementById('mapInfoText');
+            const mapInfoSubtext = document.getElementById('mapInfoSubtext');
+            const cityFilter = document.getElementById('cityFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            mapInfoText.textContent = `${filteredCampaigns.length} colaboraciones en ${cityFilter}`;
+            
+            if (categoryFilter !== 'TODAS LAS CATEGORÍAS') {
+                mapInfoSubtext.textContent = `Categoría: ${categoryFilter}`;
+            } else {
+                mapInfoSubtext.textContent = '';
+            }
+        }
+
+        // Toggle filters
+        function toggleFilters() {
+            const filters = document.getElementById('filters');
+            filters.classList.toggle('show');
+        }
+
+        // Refresh campaigns
+        function refreshCampaigns() {
+            // Simulate refresh
+            filteredCampaigns = [...mockCampaigns];
+            updateMapMarkers();
+            updateCampaignsList();
+            updateResultsCounter();
+            updateMapInfo();
+        }
+
+        // View campaign details
+        function viewCampaignDetails(campaignId) {
+            const campaign = filteredCampaigns.find(c => c.id === campaignId);
+            if (campaign) {
+                alert(`Detalles de ${campaign.businessName}:\n\n${campaign.description}\n\nEsta funcionalidad se expandirá en la versión completa de la app.`);
+            }
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+            filterCampaigns();
+        });
+    </script>
+</body>
+</html>

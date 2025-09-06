@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crear Iconos Zyro</title>
+</head>
+<body>
+    <canvas id="canvas" width="1024" height="1024" style="border: 1px solid #ccc;"></canvas>
+    <br><br>
+    <button onclick="downloadIcon('icon.png', 1024)">Descargar icon.png (1024x1024)</button>
+    <button onclick="downloadIcon('adaptive-icon-foreground.png', 432)">Descargar adaptive-icon-foreground.png (432x432)</button>
+    <button onclick="downloadIcon('adaptive-icon-background.png', 432)">Descargar adaptive-icon-background.png (432x432)</button>
+    <button onclick="downloadIcon('favicon.png', 32)">Descargar favicon.png (32x32)</button>
+    <button onclick="downloadIcon('splash.png', 1284)">Descargar splash.png (1284x2778)</button>
+
+    <script>
+        function createIcon(size) {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Limpiar canvas
+            ctx.clearRect(0, 0, 1024, 1024);
+            
+            // Fondo negro
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, 1024, 1024);
+            
+            // Círculo dorado exterior
+            ctx.strokeStyle = '#C9A961';
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.arc(512, 512, 480, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Círculo interior
+            ctx.fillStyle = '#111111';
+            ctx.beginPath();
+            ctx.arc(512, 512, 400, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Texto ZYRO
+            ctx.fillStyle = '#C9A961';
+            ctx.font = 'bold 120px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.letterSpacing = '8px';
+            ctx.fillText('ZYRO', 512, 540);
+            
+            // Átomo símbolo
+            const atomX = 512;
+            const atomY = 300;
+            
+            // Núcleo
+            ctx.fillStyle = '#C9A961';
+            ctx.beginPath();
+            ctx.arc(atomX, atomY, 12, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Órbitas
+            ctx.strokeStyle = '#C9A961';
+            ctx.lineWidth = 3;
+            ctx.globalAlpha = 0.8;
+            
+            // Órbita 1
+            ctx.beginPath();
+            ctx.ellipse(atomX, atomY, 60, 20, 0, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Órbita 2
+            ctx.beginPath();
+            ctx.ellipse(atomX, atomY, 60, 20, Math.PI / 3, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Órbita 3
+            ctx.beginPath();
+            ctx.ellipse(atomX, atomY, 60, 20, 2 * Math.PI / 3, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Electrones
+            ctx.fillStyle = '#D4AF37';
+            ctx.globalAlpha = 1;
+            ctx.beginPath();
+            ctx.arc(atomX + 60, atomY, 4, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(atomX - 30, atomY + 52, 4, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(atomX - 30, atomY - 52, 4, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+        
+        function downloadIcon(filename, targetSize) {
+            createIcon(1024);
+            
+            const canvas = document.getElementById('canvas');
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            if (filename === 'splash.png') {
+                // Splash screen especial (1284x2778)
+                tempCanvas.width = 1284;
+                tempCanvas.height = 2778;
+                
+                // Fondo negro
+                tempCtx.fillStyle = '#000000';
+                tempCtx.fillRect(0, 0, 1284, 2778);
+                
+                // Centrar el logo
+                const logoSize = 400;
+                const x = (1284 - logoSize) / 2;
+                const y = (2778 - logoSize) / 2;
+                
+                tempCtx.drawImage(canvas, x, y, logoSize, logoSize);
+            } else {
+                tempCanvas.width = targetSize;
+                tempCanvas.height = targetSize;
+                tempCtx.drawImage(canvas, 0, 0, targetSize, targetSize);
+            }
+            
+            tempCanvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+        
+        // Crear icono inicial
+        createIcon(1024);
+    </script>
+</body>
+</html>

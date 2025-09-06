@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zyro Marketplace - Launcher</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #111111 100%);
+            color: #FFFFFF;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .zyro-logo {
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            font-size: 48px;
+            color: #C9A961;
+            letter-spacing: 3px;
+            display: flex;
+            align-items: center;
+            text-shadow: 0 0 20px rgba(201, 169, 97, 0.5);
+            margin-bottom: 30px;
+        }
+
+        .atom {
+            width: 48px;
+            height: 48px;
+            position: relative;
+            margin-left: 10px;
+        }
+
+        .atom-nucleus {
+            width: 10px;
+            height: 10px;
+            background: #C9A961;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .atom-orbit {
+            position: absolute;
+            border: 2px solid #C9A961;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .orbit-1 { width: 48px; height: 48px; }
+        .orbit-2 { width: 36px; height: 36px; transform: translate(-50%, -50%) rotate(60deg); }
+        .orbit-3 { width: 24px; height: 24px; transform: translate(-50%, -50%) rotate(120deg); }
+
+        .title {
+            font-size: 24px;
+            color: #C9A961;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #999999;
+            margin-bottom: 40px;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        .status {
+            background: rgba(201, 169, 97, 0.1);
+            border: 1px solid #C9A961;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            max-width: 500px;
+        }
+
+        .status-title {
+            color: #C9A961;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .status-text {
+            color: #CCCCCC;
+            font-size: 14px;
+        }
+
+        .launch-button {
+            background: linear-gradient(135deg, #C9A961 0%, #A68B47 100%);
+            color: #000000;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .launch-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(201, 169, 97, 0.4);
+        }
+
+        .instructions {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+
+        .instructions h3 {
+            color: #C9A961;
+            margin-bottom: 15px;
+        }
+
+        .instructions ol {
+            text-align: left;
+            color: #CCCCCC;
+            line-height: 1.6;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .users-info {
+            background: rgba(201, 169, 97, 0.1);
+            border: 1px solid #C9A961;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            max-width: 500px;
+        }
+
+        .users-info h3 {
+            color: #C9A961;
+            margin-bottom: 15px;
+        }
+
+        .user-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .user-item strong {
+            color: #C9A961;
+        }
+
+        .loading {
+            display: none;
+            color: #C9A961;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 2px solid #333;
+            border-top: 2px solid #C9A961;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="zyro-logo">
+        ZYR
+        <div class="atom">
+            <div class="atom-nucleus"></div>
+            <div class="atom-orbit orbit-1"></div>
+            <div class="atom-orbit orbit-2"></div>
+            <div class="atom-orbit orbit-3"></div>
+        </div>
+    </div>
+
+    <h1 class="title">Zyro Marketplace Launcher</h1>
+    <p class="subtitle">
+        Conectamos influencers con marcas para colaboraciones exclusivas.<br>
+        Haz clic en el botón para iniciar la aplicación React Native Web.
+    </p>
+
+    <div class="status">
+        <div class="status-title">🚀 Estado del Servidor</div>
+        <div class="status-text" id="server-status">
+            ✅ App lista para usar - No necesita servidor
+        </div>
+    </div>
+
+    <a href="web-map-preview.html" target="_blank" class="launch-button" id="launch-btn">
+        🗺️ Iniciar Zyro Marketplace (Con Mapas)
+    </a>
+    
+    <a href="simple-preview.html" target="_blank" class="launch-button" style="background: linear-gradient(135deg, #666 0%, #444 100%); margin-top: 10px;">
+        📱 Versión Simple (Sin Mapas)
+    </a>
+
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        Abriendo aplicación...
+    </div>
+
+    <div class="users-info">
+        <h3>👥 Usuarios de Prueba Configurados</h3>
+        <div class="user-item">
+            <strong>👑 Administrador:</strong> admin_zyrovip / xarrec-2paqra-guftoN
+        </div>
+        <div class="user-item">
+            <strong>📱 Influencer:</strong> pruebainflu / 12345
+        </div>
+        <div class="user-item">
+            <strong>🏢 Empresa:</strong> Registro automático al hacer clic en "SOY EMPRESA"
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h3>📋 Instrucciones de Uso</h3>
+        <ol>
+            <li><strong>Haz clic</strong> en "Iniciar Zyro Marketplace" para abrir la app</li>
+            <li><strong>Usa las credenciales</strong> de arriba para hacer login</li>
+            <li><strong>Explora</strong> las 4 pestañas como influencer o el panel de admin</li>
+            <li><strong>Prueba</strong> las funcionalidades de colaboraciones y filtros</li>
+            <li><strong>¡Disfruta</strong> la experiencia móvil completa!</li>
+        </ol>
+    </div>
+
+    <script>
+        // App lista para usar
+        function initApp() {
+            const statusElement = document.getElementById('server-status');
+            const launchBtn = document.getElementById('launch-btn');
+            
+            statusElement.innerHTML = '✅ Zyro Marketplace listo para usar';
+            statusElement.style.color = '#4CAF50';
+            launchBtn.style.opacity = '1';
+            launchBtn.style.pointerEvents = 'auto';
+        }
+
+        // Manejar clic en el botón de lanzar
+        document.getElementById('launch-btn').addEventListener('click', function(e) {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+            
+            setTimeout(() => {
+                loading.style.display = 'none';
+            }, 3000);
+        });
+
+        // Inicializar app al cargar la página
+        initApp();
+    </script>
+</body>
+</html>

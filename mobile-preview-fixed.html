@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zyro Marketplace - Vista Previa Móvil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* iPhone 14 Pro Max Frame */
+        .phone-frame {
+            width: 430px;
+            height: 932px;
+            background: #1d1d1f;
+            border-radius: 55px;
+            padding: 8px;
+            box-shadow: 
+                0 0 0 2px #333,
+                0 20px 60px rgba(0, 0, 0, 0.8),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 35px;
+            background: #1d1d1f;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            border-radius: 47px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            height: 54px;
+            background: #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            padding-top: 10px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* App Container */
+        .app-container {
+            height: calc(100% - 54px);
+            display: flex;
+            flex-direction: column;
+            background: #000;
+        }
+
+        /* Screen Container */
+        .screen {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            background: #000;
+            overflow-y: auto;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid #C9A961;
+            background: #000;
+        }
+
+        .logo {
+            font-family: 'Cinzel', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #C9A961;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .header-btn {
+            padding: 8px;
+            background: none;
+            border: none;
+            color: #C9A961;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .header-btn:hover {
+            background: rgba(201, 169, 97, 0.1);
+        }
+
+        /* City Selector */
+        .city-selector {
+            background: #111;
+            border: 1px solid #C9A961;
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #C9A961;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .city-selector:hover {
+            background: rgba(201, 169, 97, 0.1);
+        }
+
+        /* Category Filter */
+        .category-filter {
+            padding: 16px;
+            background: #000;
+        }
+
+        .category-dropdown {
+            width: 100%;
+            background: #111;
+            border: 1px solid #C9A961;
+            border-radius: 8px;
+            padding: 12px;
+            color: #C9A961;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        /* Collaboration Cards */
+        .collaboration-card {
+            background: #111;
+            border: 1px solid #C9A961;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(201, 169, 97, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .collaboration-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(201, 169, 97, 0.3);
+        }
+
+        .card-image {
+            height: 180px;
+            background: linear-gradient(135deg, #C9A961 0%, #D4AF37 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 16px;
+        }
+
+        .card-image-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: #C9A961;
+            margin-bottom: 4px;
+        }
+
+        .card-business-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .category-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #000;
+            border: 1px solid #C9A961;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #C9A961;
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #C9A961;
+            margin-bottom: 8px;
+        }
+
+        .card-description {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .card-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid #666;
+        }
+
+        .location-info {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            color: #999;
+        }
+
+        .view-details-btn {
+            background: #C9A961;
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .view-details-btn:hover {
+            background: #D4AF37;
+            transform: translateY(-1px);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            height: 70px;
+            background: #111;
+            border-top: 1px solid #C9A961;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+
+        .nav-item.active {
+            color: #C9A961;
+            background: rgba(201, 169, 97, 0.1);
+        }
+
+        .nav-item:hover {
+            background: rgba(201, 169, 97, 0.05);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Login Screen */
+        .login-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 32px;
+            background: linear-gradient(135deg, #000 0%, #111 100%);
+        }
+
+        .login-logo {
+            font-family: 'Cinzel', serif;
+            font-size: 48px;
+            font-weight: 700;
+            color: #C9A961;
+            margin-bottom: 48px;
+            text-align: center;
+        }
+
+        .role-selector {
+            width: 100%;
+            margin-bottom: 32px;
+        }
+
+        .role-option {
+            width: 100%;
+            background: #111;
+            border: 2px solid #C9A961;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .role-option:hover {
+            background: rgba(201, 169, 97, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .role-option.selected {
+            background: rgba(201, 169, 97, 0.2);
+            border-color: #D4AF37;
+        }
+
+        .role-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #C9A961;
+            margin-bottom: 8px;
+        }
+
+        .role-description {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #C9A961 0%, #D4AF37 100%);
+            color: #000;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(201, 169, 97, 0.4);
+        }
+
+        /* Map Screen */
+        .map-container {
+            flex: 1;
+            background: #111;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .map-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #C9A961;
+        }
+
+        .map-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .map-text {
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* Profile Screen */
+        .profile-header {
+            background: linear-gradient(135deg, #C9A961 0%, #D4AF37 100%);
+            padding: 32px 16px;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: #000;
+            border-radius: 40px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #C9A961;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 8px;
+        }
+
+        .profile-role {
+            font-size: 16px;
+            color: rgba(0, 0, 0, 0.7);
+        }
+
+        .profile-menu {
+            padding: 16px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .menu-item:hover {
+            background: #222;
+            border-color: #C9A961;
+        }
+
+        .menu-item-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-item-text {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .menu-item-icon {
+            color: #C9A961;
+        }
+
+        /* History Screen */
+        .history-tabs {
+            display: flex;
+            background: #111;
+            border-radius: 8px;
+            margin: 16px;
+            overflow: hidden;
+        }
+
+        .history-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-tab.active {
+            background: #C9A961;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .history-list {
+            padding: 0 16px;
+        }
+
+        .history-item {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .history-item-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #C9A961;
+            margin-bottom: 8px;
+        }
+
+        .history-item-status {
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .status-pending {
+            background: rgba(255, 152, 0, 0.2);
+            color: #FF9800;
+        }
+
+        .status-approved {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .status-rejected {
+            background: rgba(244, 67, 54, 0.2);
+            color: #F44336;
+        }
+
+        .history-item-date {
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* Role Switcher */
+        .role-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #C9A961;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .role-switch-btn {
+            background: #C9A961;
+            color: #000;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .role-switch-btn:hover {
+            background: #D4AF37;
+        }
+
+        .role-switch-btn.active {
+            background: #D4AF37;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .phone-frame {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+                padding: 0;
+            }
+            
+            .phone-screen {
+                border-radius: 0;
+            }
+            
+            .phone-frame::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Role Switcher -->
+    <div class="role-switcher">
+        <div style="color: #C9A961; font-size: 12px; margin-bottom: 8px; font-weight: 600;">Cambiar Rol:</div>
+        <button class="role-switch-btn" onclick="switchRole('login')">Login</button>
+        <button class="role-switch-btn active" onclick="switchRole('influencer')">Influencer</button>
+        <button class="role-switch-btn" onclick="switchRole('company')">Empresa</button>
+        <button class="role-switch-btn" onclick="switchRole('admin')">Admin</button>
+    </div>
+
+    <div class="phone-frame">
+        <div class="phone-screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="status-left">
+                    <span>9:41</span>
+                </div>
+                <div class="status-right">
+                    <span class="material-icons" style="font-size: 16px;">signal_cellular_4_bar</span>
+                    <span class="material-icons" style="font-size: 16px;">wifi</span>
+                    <span class="material-icons" style="font-size: 16px;">battery_full</span>
+                </div>
+            </div>
+
+            <div class="app-container">
+                <!-- Login Screen -->
+                <div class="screen active" id="login-screen">
+                    <div class="login-container">
+                        <div class="login-logo">ZYRO</div>
+                        <div class="role-selector">
+                            <div class="role-option selected" onclick="selectRole('influencer')">
+                                <div class="role-title">Influencer</div>
+                                <div class="role-description">Descubre colaboraciones exclusivas</div>
+                            </div>
+                            <div class="role-option" onclick="selectRole('company')">
+                                <div class="role-title">Empresa</div>
+                                <div class="role-description">Gestiona tus campañas</div>
+                            </div>
+                            <div class="role-option" onclick="selectRole('admin')">
+                                <div class="role-title">Administrador</div>
+                                <div class="role-description">Panel de control</div>
+                            </div>
+                        </div>
+                        <button class="login-btn" onclick="login()">Iniciar Sesión</button>
+                    </div>
+                </div>
+
+                <!-- Home Screen (Influencer) -->
+                <div class="screen" id="home-screen">
+                    <div class="header">
+                        <div class="logo">ZYRO</div>
+                        <select class="city-selector" id="city-selector" onchange="filterCollaborations()">
+                            <option value="Madrid">Madrid</option>
+                            <option value="Barcelona">Barcelona</option>
+                            <option value="Valencia">Valencia</option>
+                            <option value="Sevilla">Sevilla</option>
+                        </select>
+                        <div class="header-actions">
+                            <button class="header-btn">
+                                <span class="material-icons">search</span>
+                            </button>
+                            <button class="header-btn">
+                                <span class="material-icons">settings</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="category-filter">
+                        <select class="category-dropdown" id="category-selector" onchange="filterCollaborations()">
+                            <option value="all">TODAS LAS CATEGORÍAS</option>
+                            <option value="gastronomia">GASTRONOMÍA</option>
+                            <option value="moda">MODA</option>
+                            <option value="belleza">BELLEZA</option>
+                            <option value="tecnologia">TECNOLOGÍA</option>
+                            <option value="viajes">VIAJES</option>
+                        </select>
+                    </div>
+
+                    <div class="content" id="collaborations-content">
+                        <!-- Collaborations will be loaded here -->
+                    </div>
+
+                    <div class="bottom-nav">
+                        <div class="nav-item active" onclick="showScreen('home')">
+                            <span class="material-icons nav-icon">home</span>
+                            <span class="nav-label">Inicio</span>
+                        </div>
+                        <div class="nav-item" onclick="showScreen('map')">
+                            <span class="material-icons nav-icon">map</span>
+                            <span class="nav-label">Mapa</span>
+                        </div>
+                        <div class="nav-item" onclick="showScreen('history')">
+                            <span class="material-icons nav-icon">history</span>
+                            <span class="nav-label">Historial</span>
+                        </div>
+                        <div class="nav-item" onclick="showScreen('profile')">
+                            <span class="material-icons nav-icon">person</span>
+                            <span class="nav-label">Perfil</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map Screen -->
+                <div class="screen" id="map-screen">
+                    <div class="header">
+                        <div class="logo">ZYRO</div>
+                        <div style="color: #C9A961; font-weight: 600;">Mapa de Colaboraciones</div>
+                        <div class="header-actions">
+                            <button class="header-btn">
+                                <span class="material-icons">my_location</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="map-container">
+                        <div class="map-placeholder">
+                            <span class="material-icons map-icon">map</span>
+                            <div class="map-text">Mapa Interactivo de España</div>
+                            <div style="font-size: 14px; color: #999; margin-top: 8px; text-align: center;">
+                                Toca las ubicaciones para ver colaboraciones disponibles
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bottom-nav">
+                        <div class="nav-item" onclick="showScreen('home')">
+                            <span class="material-icons nav-icon">home</span>
+                            <span class="nav-label">Inicio</span>
+                        </div>
+                        <div class="nav-item active" onclick="showScreen('map')">
+                            <span class="material-icons nav-icon">map</span>
+                            <span class="nav-label">Mapa</span>
+                        </div>
+                        <div class="nav-item" onclick="showScreen('history')">
+                            <span class="material-icons nav-icon">history</span>
+                            <span class="nav-label">Historial</span>
+                        </div>
+                        <div class="nav-item" onclick="showScreen('profile')">
+                            <span class="material-icons nav-icon">person</span>
+                            <span class="nav-label">Perfil</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Screen -->
+                <div class="screen" id="history-screen">
+                    <div class="header">
+                        <div class="logo">ZYRO</div>
+                        <div style="color: #C9A961; font-weight: 600;">Historial</div>
+                        <div class="header-actions">
+                            <button class="header-btn">
+                                <span class="material-icons">filter_list</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="history-tabs">
+                        <button class="history-tab active" onclick="showHistoryTab('pending')">Pendientes</button>
+                        <button class="history-tab" onclick="showHistoryTab('approved')">Aprobadas</button>
+                        <button class="history-tab" onclick="showHistoryTab('rejected')">Rechazadas</button>
+                    </div>
+
+                    <div class="content">
+                        <div class="history-list" id="history-content">
+                            <!-- History items will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="bottom-nav">
+                        <div class="nav-item" onclick="showScreen('home')">
+                            <span class="material-icons nav-icon">home</span>
+                            <span class="nav-label">Inicio</span>
+                        </div>
+                        <div class="nav-item" onclick="showScreen('map')">
+                            <span class="material-icons nav-icon">map</span>
+                            <span class="nav-label">Mapa</span>
+                        </div>
+                        <div class="nav-item active" onclick="showScreen('history')">
+                            <span class="material-icons nav-icon">history</span>
+                            <span class="nav-label">Historial</span>
+                        </div>
+                        <div class="nav-item" onclick="showScreen('profile')">
+                            <span class="material-icons nav-icon">person</span>
+                            <span class="nav-label">Perfil</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Screen -->
+                <div class="screen" id="profile-screen">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <span class="material-icons">person</span>
+                        </div>
+                        <div class="profile-name">Ana García</div>
+                        <div class="profile-role">Influencer Premium</div>
+                    </div>
+
+                    <div class="content">
+                        <div class="profile-menu">
+                            <div class="menu-item" onclick="showProfileSection('personal')">
+                                <div class="menu-item-left">
+                                    <span class="material-icons menu-item-icon">person</span>
+                                    <span class="menu-item-text">Datos Personales</span>
+                                </div>
+                                <span class="material-icons" style="color: #666;">chevron_right</span>
+                            </div>
+                            
+                            <div class="menu-item" onclick="showProfileSection('security')">
+                                <div class="menu-item-left">
+                                    <span class="material-icons menu-item-icon">security</span>
+                                    <span class="menu-item-text">Seguridad</span>
+                                </div>
+                                <span class="material-icons" style="color: #666;">chevron_right</span>
+                            </div>
+                            
+                            <div class="menu-item" onclick="showProfileSection('notifications')">
+                                <div class="menu-item-left">
+                                    <span class="material-icons menu-item-icon">notifications</span>
+                                    <span class="menu-item-text">Notificaciones</span>
+                                </div>
+                                <span class="material-icons" style="color: #666;">chevron_right</span>
+                            </div>
+                            
+                            <div class="menu-item" onclick="showProfileSection('privacy')">
+                                <div class="menu-item-left">
+                                    <span class="material-icons menu-item-icon">privacy_tip</span>
+                                    <span class="menu-item-text">Privacidad</span>
+                                </div>
+                                <span class="material-icons" style="color: #666;">chevron_right</span>
+                            </div>
+                            
+                            <div class="menu-item" onclick="showProfileSection('help')">
+                                <div class="menu-item-left">
+                                    <span class="material-icons menu-item-icon">help</span>
+                                    <span class="menu-item-text">Ayuda y Soporte</span>
+                                </div>
+                                <span class="material-icons" style="color: #666;">chevron_right</span>
+                            </div>
+                            
+                            <div class="menu-item" onclick="logout()" style="border-color: #F44336;">
+                                <div class="menu-item-left">
+                                    <span class="material-icons" style="color: #F44336;">logout</span>
+                                    <span class="menu-item-text" style="color: #F44336;">Cerrar Sesión</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bottom-nav">
+                        <div class="nav-item" onclick="showScreen('home')">
+                            <span class="material-icons nav-icon">home</span>
+                            <span class="nav-label">Inicio</span>
+                        </div>
+                        <div class="nav-item" onclick="showScreen('map')">
+                            <span class="material-icons nav-icon">map</span>
+                            <span class="nav-label">Mapa</span>
+                        </div>
+                        <div class="nav-item" onclick="showScreen('history')">
+                            <span class="material-icons nav-icon">history</span>
+                            <span class="nav-label">Historial</span>
+                        </div>
+                        <div class="nav-item active" onclick="showScreen('profile')">
+                            <span class="material-icons nav-icon">person</span>
+                            <span class="nav-label">Perfil</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data
+        const mockCollaborations = [
+            {
+                id: 1,
+                title: "Degustación Premium",
+                businessName: "Restaurante Elegance",
+                description: "Experiencia gastronómica exclusiva en el corazón de Madrid. Menú degustación de 7 platos con maridaje incluido.",
+                category: "gastronomia",
+                city: "Madrid",
+                minFollowers: 10000,
+                maxCompanions: 2,
+                requirements: "Mínimo 10K seguidores en Instagram, contenido gastronómico previo"
+            },
+            {
+                id: 2,
+                title: "Colección Primavera",
+                businessName: "Boutique Luxe",
+                description: "Presentación de la nueva colección primavera-verano. Sesión de fotos profesional incluida.",
+                category: "moda",
+                city: "Madrid",
+                minFollowers: 25000,
+                maxCompanions: 1,
+                requirements: "Mínimo 25K seguidores, estilo fashion lifestyle"
+            },
+            {
+                id: 3,
+                title: "Tratamiento Facial Premium",
+                businessName: "Spa Wellness",
+                description: "Tratamiento facial de lujo con productos orgánicos. Experiencia de relajación completa.",
+                category: "belleza",
+                city: "Barcelona",
+                minFollowers: 15000,
+                maxCompanions: 0,
+                requirements: "Mínimo 15K seguidores, contenido beauty y wellness"
+            }
+        ];
+
+        const mockHistory = {
+            pending: [
+                {
+                    id: 1,
+                    title: "Degustación Premium - Restaurante Elegance",
+                    status: "pending",
+                    date: "2024-01-15",
+                    statusText: "Pendiente de aprobación"
+                }
+            ],
+            approved: [
+                {
+                    id: 2,
+                    title: "Colección Otoño - Fashion Store",
+                    status: "approved",
+                    date: "2024-01-10",
+                    statusText: "Aprobada - Programada para el 25/01"
+                }
+            ],
+            rejected: [
+                {
+                    id: 3,
+                    title: "Evento Tech - StartupHub",
+                    status: "rejected",
+                    date: "2024-01-08",
+                    statusText: "No cumple requisitos mínimos"
+                }
+            ]
+        };
+
+        let currentRole = 'influencer';
+        let selectedRole = 'influencer';
+        let currentScreen = 'login';
+        let currentHistoryTab = 'pending';
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCollaborations();
+            loadHistory();
+        });
+
+        // Role management
+        function selectRole(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.target.closest('.role-option').classList.add('selected');
+        }
+
+        function switchRole(role) {
+            currentRole = role;
+            
+            // Update role switcher buttons
+            document.querySelectorAll('.role-switch-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            if (role === 'login') {
+                showScreen('login');
+            } else {
+                currentRole = role;
+                showScreen('home');
+            }
+        }
+
+        function login() {
+            currentRole = selectedRole;
+            showScreen('home');
+        }
+
+        function logout() {
+            showScreen('login');
+        }
+
+        // Screen navigation
+        function showScreen(screenName) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show target screen
+            const targetScreen = document.getElementById(screenName + '-screen');
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+                currentScreen = screenName;
+            }
+            
+            // Update navigation
+            updateNavigation(screenName);
+            
+            // Load screen-specific content
+            if (screenName === 'home') {
+                loadCollaborations();
+            } else if (screenName === 'history') {
+                loadHistory();
+            }
+        }
+
+        function updateNavigation(activeScreen) {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Find and activate the correct nav item based on screen
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                const onclick = item.getAttribute('onclick');
+                if (onclick && onclick.includes(activeScreen)) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        // Collaborations
+        function loadCollaborations() {
+            const container = document.getElementById('collaborations-content');
+            if (!container) return;
+            
+            const selectedCity = document.getElementById('city-selector')?.value || 'Madrid';
+            const selectedCategory = document.getElementById('category-selector')?.value || 'all';
+            
+            let filteredCollaborations = mockCollaborations.filter(collab => {
+                const cityMatch = collab.city === selectedCity;
+                const categoryMatch = selectedCategory === 'all' || collab.category === selectedCategory;
+                return cityMatch && categoryMatch;
+            });
+            
+            if (filteredCollaborations.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 48px 16px; color: #666;">
+                        <span class="material-icons" style="font-size: 48px; margin-bottom: 16px;">search_off</span>
+                        <div style="font-size: 18px; margin-bottom: 8px;">No hay colaboraciones disponibles</div>
+                        <div style="font-size: 14px;">en ${selectedCity} para esta categoría</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = filteredCollaborations.map(collab => `
+                <div class="collaboration-card" onclick="showCollaborationDetail(${collab.id})">
+                    <div class="card-image">
+                        <div class="card-image-overlay">
+                            <div class="card-image-text">${collab.title}</div>
+                            <div class="card-business-name">${collab.businessName}</div>
+                        </div>
+                        <div class="category-badge">${collab.category.toUpperCase()}</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title">${collab.title}</div>
+                        <div class="card-description">${collab.description}</div>
+                        <div class="card-info">
+                            <div class="info-item">
+                                <span class="material-icons" style="color: #C9A961;">people</span>
+                                <span>Min. ${collab.minFollowers.toLocaleString()} seguidores</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="material-icons" style="color: #C9A961;">group_add</span>
+                                <span>+${collab.maxCompanions} acompañantes</span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="location-info">
+                                <span class="material-icons">location_on</span>
+                                <span>${collab.city}</span>
+                            </div>
+                            <button class="view-details-btn" onclick="event.stopPropagation(); showCollaborationDetail(${collab.id})">
+                                Ver Detalles
+                                <span class="material-icons">arrow_forward</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterCollaborations() {
+            loadCollaborations();
+        }
+
+        function showCollaborationDetail(id) {
+            const collab = mockCollaborations.find(c => c.id === id);
+            if (!collab) return;
+            
+            alert(`🎯 DETALLES DE COLABORACIÓN\n\n📍 ${collab.title}\n🏢 ${collab.businessName}\n📝 ${collab.description}\n\n✅ REQUISITOS:\n${collab.requirements}\n\n👥 Seguidores mínimos: ${collab.minFollowers.toLocaleString()}\n👫 Acompañantes: +${collab.maxCompanions}\n📍 Ubicación: ${collab.city}\n\n💡 En la app real, aquí se abriría una pantalla completa con:\n• Galería de fotos del negocio\n• Calendario para reservar fecha\n• Chat directo con la empresa\n• Botón de solicitar colaboración\n• Información de contacto\n• Condiciones de pago`);
+        }
+
+        // History
+        function loadHistory() {
+            showHistoryTab(currentHistoryTab);
+        }
+
+        function showHistoryTab(tab) {
+            currentHistoryTab = tab;
+            
+            // Update tab buttons
+            document.querySelectorAll('.history-tab').forEach(tabBtn => {
+                tabBtn.classList.remove('active');
+            });
+            
+            // Find the correct tab button and activate it
+            const tabButtons = document.querySelectorAll('.history-tab');
+            const tabIndex = tab === 'pending' ? 0 : tab === 'approved' ? 1 : 2;
+            if (tabButtons[tabIndex]) {
+                tabButtons[tabIndex].classList.add('active');
+            }
+            
+            // Load content
+            const container = document.getElementById('history-content');
+            if (!container) return;
+            
+            const items = mockHistory[tab] || [];
+            
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 48px 16px; color: #666;">
+                        <span class="material-icons" style="font-size: 48px; margin-bottom: 16px;">inbox</span>
+                        <div style="font-size: 18px;">No hay colaboraciones ${tab === 'pending' ? 'pendientes' : tab === 'approved' ? 'aprobadas' : 'rechazadas'}</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = items.map(item => `
+                <div class="history-item">
+                    <div class="history-item-title">${item.title}</div>
+                    <div class="history-item-status status-${item.status}">${item.statusText}</div>
+                    <div class="history-item-date">Fecha: ${new Date(item.date).toLocaleDateString('es-ES')}</div>
+                </div>
+            `).join('');
+        }
+
+        // Profile
+        function showProfileSection(section) {
+            const sections = {
+                personal: '👤 DATOS PERSONALES\n\n• Nombre completo\n• Email y teléfono\n• Redes sociales conectadas\n• Información de facturación\n• Preferencias de idioma',
+                security: '🔒 CONFIGURACIÓN DE SEGURIDAD\n\n• Cambiar contraseña\n• Autenticación de dos factores\n• Dispositivos conectados\n• Historial de accesos\n• Alertas de seguridad',
+                notifications: '🔔 PREFERENCIAS DE NOTIFICACIONES\n\n• Nuevas colaboraciones\n• Mensajes de empresas\n• Actualizaciones de solicitudes\n• Recordatorios de eventos\n• Newsletter y promociones',
+                privacy: '🛡️ CONFIGURACIÓN DE PRIVACIDAD\n\n• Visibilidad del perfil\n• Datos compartidos con empresas\n• Configuración GDPR\n• Exportar datos personales\n• Eliminar cuenta',
+                help: '❓ AYUDA Y SOPORTE\n\n• Centro de ayuda\n• Chat con soporte\n• Reportar problema\n• Sugerir mejora\n• Términos y condiciones'
+            };
+            
+            alert(sections[section] || 'Sección no disponible');
+        }
+
+        // Add smooth transitions and touch feedback
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add touch feedback to interactive elements
+            document.querySelectorAll('button, .collaboration-card, .nav-item, .menu-item, .role-option').forEach(element => {
+                element.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                    this.style.transition = 'transform 0.1s ease';
+                });
+                
+                element.addEventListener('touchend', function() {
+                    this.style.transform = 'scale(1)';
+                });
+                
+                element.addEventListener('mousedown', function() {
+                    this.style.transform = 'scale(0.98)';
+                    this.style.transition = 'transform 0.1s ease';
+                });
+                
+                element.addEventListener('mouseup', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+        });
+
+        // Simulate haptic feedback
+        function simulateHaptic() {
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+
+        // Add haptic feedback to clicks
+        document.addEventListener('click', simulateHaptic);
+    </script>
+</body>
+</html>

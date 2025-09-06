@@ -1,0 +1,134 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# Dependencies
+node_modules/
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.pnpm-debug.log*
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+.expo-shared/
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+android/
+ios/
+
+# Metro
+.metro-health-check*
+.metro-cache/
+
+# Environment files
+.env
+.env*.local
+.env.development
+.env.staging
+.env.production
+
+# TypeScript
+*.tsbuildinfo
+*.d.ts.map
+
+# Testing
+coverage/
+.nyc_output/
+junit.xml
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.pem
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Build outputs
+build/
+dist/
+out/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# Google Services
+google-services.json
+GoogleService-Info.plist
+
+# Sentry
+.sentryclirc
+
+# EAS
+eas.json.bak
+
+# Local database
+*.db
+*.sqlite
+*.sqlite3
+
+# Certificates and keys
+*.p12
+*.mobileprovision
+*.keystore
+*.jks
+
+# Sensitive configuration
+config/secrets.ts
+src/config/secrets.ts
+
+# Generated assets
+assets/generated/
+
+# Backup files
+*.backup
+*.bak
+
+# Package manager lock files (optional - uncomment if needed)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml

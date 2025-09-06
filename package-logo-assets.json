@@ -1,0 +1,13 @@
+{
+  "name": "zyro-logo-assets",
+  "version": "1.0.0",
+  "description": "Generador de assets PNG para ZYRO",
+  "scripts": {
+    "generate-pngs": "node scripts/generate-pngs-node.js",
+    "install-deps": "npm install sharp canvas"
+  },
+  "devDependencies": {
+    "sharp": "^0.32.0",
+    "canvas": "^2.11.0"
+  }
+}

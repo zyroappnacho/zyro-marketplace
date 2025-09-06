@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ZYRO Logo PNG Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #000; color: #fff; }
+        canvas { border: 1px solid #333; margin: 10px; }
+        .download-section { margin: 20px 0; }
+        button { background: #C9A961; color: #000; border: none; padding: 10px 20px; margin: 5px; cursor: pointer; border-radius: 5px; }
+        button:hover { background: #D4AF37; }
+    </style>
+</head>
+<body>
+    <h1>🎨 ZYRO Logo PNG Generator</h1>
+    <p>Esta herramienta genera todos los PNG necesarios para tu app ZYRO.</p>
+    
+    <div class="download-section">
+        <h2>📱 Assets Principales</h2>
+        <canvas id="icon" width="1024" height="1024"></canvas>
+        <button onclick="downloadCanvas('icon', 'icon.png')">Descargar icon.png</button>
+        
+        <canvas id="adaptive-icon" width="1024" height="1024"></canvas>
+        <button onclick="downloadCanvas('adaptive-icon', 'adaptive-icon.png')">Descargar adaptive-icon.png</button>
+        
+        <canvas id="favicon" width="48" height="48"></canvas>
+        <button onclick="downloadCanvas('favicon', 'favicon.png')">Descargar favicon.png</button>
+    </div>
+    
+    <div class="download-section">
+        <h2>🤖 Assets Android</h2>
+        <canvas id="foreground" width="432" height="432"></canvas>
+        <button onclick="downloadCanvas('foreground', 'adaptive-icon-foreground.png')">Descargar foreground</button>
+        
+        <canvas id="background" width="432" height="432"></canvas>
+        <button onclick="downloadCanvas('background', 'adaptive-icon-background.png')">Descargar background</button>
+    </div>
+    
+    <div class="download-section">
+        <h2>🌟 Splash Screen</h2>
+        <canvas id="splash" width="640" height="1390" style="max-width: 300px;"></canvas>
+        <button onclick="downloadCanvas('splash', 'splash.png')">Descargar splash.png</button>
+    </div>
+    
+    <div class="download-section">
+        <button onclick="downloadAll()" style="background: #D4AF37; font-size: 16px; padding: 15px 30px;">📦 Descargar Todos los Assets</button>
+    </div>
+
+    <script>
+        // Colores del logo ZYRO
+        const colors = {
+            gold: '#C9A961',
+            darkGold: '#A68B47', 
+            brightGold: '#D4AF37',
+            background: '#1a1a1a',
+            circle: '#2a2a2a'
+        };
+
+        // Función para crear gradiente dorado
+        function createGoldGradient(ctx, x, y, width, height) {
+            const gradient = ctx.createLinearGradient(x, y, x + width, y + height);
+            gradient.addColorStop(0, colors.brightGold);
+            gradient.addColorStop(0.5, colors.gold);
+            gradient.addColorStop(1, colors.darkGold);
+            return gradient;
+        }
+
+        // Función para dibujar el logo ZYRO
+        function drawZyroLogo(canvasId, variant = 'full') {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // Limpiar canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            if (variant === 'background') {
+                // Solo fondo para adaptive icon background
+                const bgGradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width/2);
+                bgGradient.addColorStop(0, colors.circle);
+                bgGradient.addColorStop(0.7, colors.background);
+                bgGradient.addColorStop(1, '#000000');
+                ctx.fillStyle = bgGradient;
+                ctx.fillRect(0, 0, width, height);
+                return;
+            }
+            
+            if (variant === 'full' || variant === 'splash') {
+                // Fondo principal
+                if (variant === 'splash') {
+                    const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
+                    bgGradient.addColorStop(0, '#000000');
+                    bgGradient.addColorStop(0.5, colors.background);
+                    bgGradient.addColorStop(1, '#000000');
+                    ctx.fillStyle = bgGradient;
+                } else {
+                    ctx.fillStyle = colors.background;
+                }
+                ctx.fillRect(0, 0, width, height);
+                
+                // Círculo de fondo
+                const circleRadius = Math.min(width, height) * 0.35;
+                const centerX = width / 2;
+                const centerY = height / 2;
+                
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, circleRadius, 0, 2 * Math.PI);
+                ctx.fillStyle = colors.circle;
+                ctx.fill();
+                
+                // Borde dorado del círculo
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, circleRadius, 0, 2 * Math.PI);
+                ctx.strokeStyle = createGoldGradient(ctx, centerX - circleRadius, centerY - circleRadius, circleRadius * 2, circleRadius * 2);
+                ctx.lineWidth = Math.max(2, width / 256);
+                ctx.stroke();
+            }
+            
+            if (variant === 'full' || variant === 'foreground' || variant === 'splash') {
+                // Texto ZYRO
+                const fontSize = Math.max(12, width / 8);
+                ctx.font = `bold ${fontSize}px serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                const textX = width / 2;
+                const textY = height / 2 + fontSize * 0.1;
+                
+                // Sombra del texto
+                ctx.shadowColor = colors.gold;
+                ctx.shadowBlur = fontSize / 10;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+                
+                // Texto con gradiente dorado
+                ctx.fillStyle = createGoldGradient(ctx, textX - fontSize * 2, textY - fontSize/2, fontSize * 4, fontSize);
+                ctx.fillText('ZYRO', textX, textY);
+                
+                // Resetear sombra
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // Función para descargar canvas como PNG
+        function downloadCanvas(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Función para descargar todos los assets
+        function downloadAll() {
+            const assets = [
+                { id: 'icon', name: 'icon.png' },
+                { id: 'adaptive-icon', name: 'adaptive-icon.png' },
+                { id: 'favicon', name: 'favicon.png' },
+                { id: 'foreground', name: 'adaptive-icon-foreground.png' },
+                { id: 'background', name: 'adaptive-icon-background.png' },
+                { id: 'splash', name: 'splash.png' }
+            ];
+            
+            assets.forEach((asset, index) => {
+                setTimeout(() => {
+                    downloadCanvas(asset.id, asset.name);
+                }, index * 500); // Delay para evitar problemas de descarga
+            });
+        }
+
+        // Generar todos los logos al cargar la página
+        window.onload = function() {
+            drawZyroLogo('icon', 'full');
+            drawZyroLogo('adaptive-icon', 'full');
+            drawZyroLogo('favicon', 'full');
+            drawZyroLogo('foreground', 'foreground');
+            drawZyroLogo('background', 'background');
+            drawZyroLogo('splash', 'splash');
+        };
+    </script>
+</body>
+</html>
