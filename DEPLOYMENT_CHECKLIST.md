@@ -184,8 +184,8 @@
 
 ### Assets Visuales
 - [ ] **Paleta de Colores** - Dorado (#C9A961) y negro consistentes
-- [ ] **Tipografía** - Cinzel para logo, Inter para contenido
-- [ ] **Logo Zyro** - Especificaciones exactas implementadas
+- [ ] **Tipografía** - Inter para todo el contenido
+- [ ] **Logo Zyro** - Imagen logozyrotransparente.PNG implementada
 - [ ] **Screenshots** - Calidad premium, sin elementos placeholder
 
 ### Funcionalidades Destacadas

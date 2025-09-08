@@ -16,6 +16,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "incremental": true,
+    "allowJs": true,
+    "jsx": "react-native",
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -49,7 +51,9 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx"
   ],
   "exclude": [
     "node_modules",

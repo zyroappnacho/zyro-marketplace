@@ -1,0 +1,40 @@
+{
+  "ios": {
+    "icon": {
+      "size": "1024x1024",
+      "filename": "icon.png",
+      "description": "iOS App Store icon"
+    },
+    "splash": {
+      "size": "1200x300",
+      "filename": "splash.png",
+      "description": "iOS splash screen"
+    }
+  },
+  "android": {
+    "icon": {
+      "size": "512x512",
+      "filename": "adaptive-icon.png",
+      "description": "Android adaptive icon"
+    },
+    "splash": {
+      "size": "1200x300",
+      "filename": "splash.png",
+      "description": "Android splash screen"
+    }
+  },
+  "web": {
+    "favicon": {
+      "size": "64x64",
+      "filename": "favicon.png",
+      "description": "Web favicon"
+    }
+  },
+  "notifications": {
+    "icon": {
+      "size": "192x192",
+      "filename": "notification-icon.png",
+      "description": "Push notification icon"
+    }
+  }
+}

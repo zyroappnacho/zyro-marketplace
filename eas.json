@@ -1,82 +1,39 @@
 {
   "cli": {
-    "version": ">= 5.0.0",
-    "appVersionSource": "local"
+    "version": ">= 12.0.0"
   },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "env": {
-        "NODE_ENV": "development",
-        "API_URL": "http://localhost:3000",
-        "FIREBASE_PROJECT_ID": "zyro-marketplace-dev"
-      },
-      "android": {
-        "buildType": "apk",
-        "gradleCommand": ":app:assembleDebug"
-      },
       "ios": {
         "simulator": true,
         "buildConfiguration": "Debug"
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "preview": {
       "distribution": "internal",
-      "env": {
-        "NODE_ENV": "staging",
-        "API_URL": "https://api-staging.zyromarketplace.com",
-        "FIREBASE_PROJECT_ID": "zyro-marketplace-staging"
-      },
-      "android": {
-        "buildType": "apk",
-        "gradleCommand": ":app:assembleRelease"
-      },
       "ios": {
         "simulator": false,
         "buildConfiguration": "Release"
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "production": {
-      "env": {
-        "NODE_ENV": "production",
-        "EXPO_PUBLIC_API_URL": "https://api.zyromarketplace.com/api",
-        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "zyro-marketplace-prod"
-      },
-      "android": {
-        "buildType": "app-bundle",
-        "gradleCommand": ":app:bundleRelease"
-      },
       "ios": {
-        "simulator": false,
         "buildConfiguration": "Release"
-      }
-    },
-    "production-apk": {
-      "extends": "production",
+      },
       "android": {
-        "buildType": "apk",
-        "gradleCommand": ":app:assembleRelease"
+        "buildType": "aab"
       }
     }
   },
   "submit": {
-    "production": {
-      "android": {
-        "serviceAccountKeyPath": "./google-service-account.json",
-        "track": "internal",
-        "releaseStatus": "draft",
-        "changesNotSentForReview": false
-      },
-      "ios": {
-        "appleId": "TU_APPLE_ID@example.com",
-        "ascAppId": "TU_ASC_APP_ID",
-        "appleTeamId": "TU_APPLE_TEAM_ID",
-        "sku": "zyro-marketplace-ios",
-        "language": "es-ES",
-        "companyName": "Zyro Marketplace",
-        "appName": "ZYRO"
-      }
-    }
+    "production": {}
   }
 }

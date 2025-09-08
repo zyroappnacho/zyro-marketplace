@@ -26,7 +26,7 @@ Para que la aplicación funcione correctamente, necesitas descargar e instalar l
 
 ## Uso en la Aplicación
 
-- **Logo Zyro**: Usa Cinzel SemiBold con letter-spacing de 3px
+- **Logo Zyro**: Imagen logozyrotransparente.PNG sin modificaciones
 - **Textos generales**: Usa Inter en diferentes pesos según el contexto
 - **Estética premium**: Las fuentes contribuyen al look elegante y exclusivo
 

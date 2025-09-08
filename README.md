@@ -55,7 +55,7 @@ Una aplicación móvil premium que conecta influencers cualificados con empresas
 - **Gris Oscuro**: #111111
 
 ### Tipografía
-- **Logo**: Cinzel SemiBold (peso 600, spacing 3px)
+- **Logo**: Imagen logozyrotransparente.PNG
 - **Textos**: Inter (Regular, Medium, SemiBold, Bold)
 
 ## 🚀 Instalación y Configuración

@@ -81,9 +81,8 @@ npm run preview
 - **Gris Oscuro**: #111111 ✅
 
 ### ✅ TIPOGRAFÍA ESPECÍFICA
-- **Logo Zyro**: Cinzel, peso 600, espaciado 3px ✅
+- **Logo Zyro**: Imagen logozyrotransparente.PNG implementada ✅
 - **Textos**: Inter, varios pesos ✅
-- **Átomo del logo**: Especificaciones exactas ✅
 
 ### ✅ EFECTOS PREMIUM
 - ✅ Gradientes dorados en botones
