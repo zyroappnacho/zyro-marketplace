@@ -41,6 +41,24 @@ app.use((req, res, next) => {
   next();
 });
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Zyro Marketplace Backend API',
+    status: 'running',
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    stripe_configured: !!process.env.STRIPE_SECRET_KEY,
+    prices_loaded: Object.keys(priceIds).length,
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      health: '/health',
+      stripe_checkout: '/api/stripe/create-checkout-session',
+      stripe_webhook: '/webhook/stripe'
+    }
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
