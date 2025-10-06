@@ -22,7 +22,12 @@ const priceIds = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'stripe-p
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://zyromarketplace.com', 'https://www.zyromarketplace.com']
+    ? [
+        'https://zyromarketplace.com', 
+        'https://www.zyromarketplace.com',
+        /\.onrender\.com$/,  // Permitir dominios de Render
+        /\.vercel\.app$/     // Permitir dominios de Vercel
+      ]
     : ['http://localhost:3000', 'http://localhost:19006', 'exp://192.168.1.100:19000'],
   credentials: true
 }));

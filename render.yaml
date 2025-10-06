@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: zyro-marketplace-backend
+    env: node
+    plan: free
+    buildCommand: npm install --legacy-peer-deps
+    startCommand: node backend/stripe-server-optimized.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
