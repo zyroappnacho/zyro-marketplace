@@ -1,0 +1,26 @@
+{
+  "setup_fee": 150,
+  "plans": {
+    "plan_3_months": {
+      "name": "Plan 3 Meses",
+      "monthly_price": 499,
+      "duration_months": 3,
+      "total_first_payment": 649,
+      "description": "499€/mes + 150€ pago inicial único"
+    },
+    "plan_6_months": {
+      "name": "Plan 6 Meses",
+      "monthly_price": 399,
+      "duration_months": 6,
+      "total_first_payment": 549,
+      "description": "399€/mes + 150€ pago inicial único"
+    },
+    "plan_12_months": {
+      "name": "Plan 12 Meses",
+      "monthly_price": 299,
+      "duration_months": 12,
+      "total_first_payment": 449,
+      "description": "299€/mes + 150€ pago inicial único"
+    }
+  }
+}

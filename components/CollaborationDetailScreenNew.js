@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import MinimalistIcons from './MinimalistIcons';
+import CollaborationRequestScreen from './CollaborationRequestScreen';
 import {
     View,
     Text,
@@ -22,6 +24,7 @@ const { width, height } = Dimensions.get('window');
 const CollaborationDetailScreenNew = ({ collaboration, onBack, onRequest, currentUser }) => {
     const [showRequestModal, setShowRequestModal] = useState(false);
     const [showCalendar, setShowCalendar] = useState(false);
+    const [showRequestScreen, setShowRequestScreen] = useState(false);
     const [requestForm, setRequestForm] = useState({
         preferredDate: '',
         preferredTime: '',
@@ -42,19 +45,35 @@ const CollaborationDetailScreenNew = ({ collaboration, onBack, onRequest, curren
         );
     }
 
-    const canRequest = currentUser && 
-        currentUser.instagramFollowers >= collaboration.minFollowers &&
-        currentUser.status === 'approved';
-
     const handleRequest = () => {
-        if (!canRequest) {
+        if (!currentUser) {
+            Alert.alert('Error', 'Debes iniciar sesión para solicitar colaboraciones');
+            return;
+        }
+
+        // Validación automática de seguidores
+        if (currentUser.instagramFollowers < collaboration.minFollowers) {
             Alert.alert(
-                'No elegible',
-                `Necesitas al menos ${collaboration.minFollowers} seguidores para solicitar esta colaboración.`
+                'Requisitos no cumplidos',
+                `No cumples los requisitos mínimos de seguidores. Necesitas al menos ${collaboration.minFollowers.toLocaleString()} seguidores para esta colaboración.`
             );
             return;
         }
-        setShowRequestModal(true);
+
+        setShowRequestScreen(true);
+    };
+
+    const handleSubmitRequest = (requestData) => {
+        // Aquí se enviaría la solicitud al administrador
+        console.log('Solicitud enviada:', requestData);
+
+        // Llamar a la función onRequest si existe
+        if (onRequest) {
+            onRequest(requestData);
+        }
+
+        // Cerrar la pantalla de solicitud
+        setShowRequestScreen(false);
     };
 
     const submitRequest = () => {
@@ -98,7 +117,7 @@ const CollaborationDetailScreenNew = ({ collaboration, onBack, onRequest, curren
             ios: `maps:0,0?q=${latitude},${longitude}`,
             android: `geo:0,0?q=${latitude},${longitude}`
         });
-        
+
         if (url) {
             Linking.openURL(url).catch(() => {
                 Alert.alert('Error', 'No se pudo abrir la aplicación de mapas');
@@ -114,9 +133,9 @@ const CollaborationDetailScreenNew = ({ collaboration, onBack, onRequest, curren
 
     const renderImageGallery = () => (
         <View style={styles.imageGallery}>
-            <ScrollView 
-                horizontal 
-                pagingEnabled 
+            <ScrollView
+                horizontal
+                pagingEnabled
                 showsHorizontalScrollIndicator={false}
                 onMomentumScrollEnd={(event) => {
                     const index = Math.round(event.nativeEvent.contentOffset.x / width);
@@ -132,7 +151,7 @@ const CollaborationDetailScreenNew = ({ collaboration, onBack, onRequest, curren
                     />
                 ))}
             </ScrollView>
-            
+
             {/* Image Indicators */}
             <View style={styles.imageIndicators}>
                 {collaboration.images.map((_, index) => (
@@ -171,27 +190,27 @@ const CollaborationDetailScreenNew = ({ collaboration, onBack, onRequest, curren
                                 colors={['#C9A961', '#D4AF37']}
                                 style={styles.markerGradient}
                             >
-                                <Text style={styles.markerText}>📍</Text>
+                                <MinimalistIcons name="location" size={24} color={'#888888'} isActive={false} />
                             </LinearGradient>
                         </View>
                     </Marker>
                 </MapView>
-                
+
                 {/* Map Controls */}
                 <View style={styles.mapControls}>
                     <TouchableOpacity style={styles.mapButton} onPress={openMaps}>
-                        <Text style={styles.mapButtonText}>🧭 Direcciones</Text>
+                        <View style={styles.mapButtonContent}>
+                            <MinimalistIcons name="location" size={16} color="#C9A961" isActive={false} />
+                            <Text style={styles.mapButtonText}>Direcciones</Text>
+                        </View>
                     </TouchableOpacity>
-                    
-                    {collaboration.phone && (
-                        <TouchableOpacity style={styles.mapButton} onPress={callBusiness}>
-                            <Text style={styles.mapButtonText}>📞 Llamar</Text>
-                        </TouchableOpacity>
-                    )}
                 </View>
             </View>
-            
-            <Text style={styles.addressText}>📍 {collaboration.address}</Text>
+
+            <View style={styles.addressRow}>
+                <MinimalistIcons name="location" size={16} color="#888888" isActive={false} />
+                <Text style={styles.addressText}>{collaboration.address}</Text>
+            </View>
         </View>
     );
 
@@ -210,7 +229,7 @@ const CollaborationDetailScreenNew = ({ collaboration, onBack, onRequest, curren
                             style={styles.closeButton}
                             onPress={() => setShowRequestModal(false)}
                         >
-                            <Text style={styles.closeButtonText}>✕</Text>
+                            <MinimalistIcons name="close" size={24} color={'#888888'} isActive={false} />
                         </TouchableOpacity>
                     </View>
 
@@ -241,7 +260,7 @@ const CollaborationDetailScreenNew = ({ collaboration, onBack, onRequest, curren
                                         <Text style={styles.dateButtonText}>
                                             {requestForm.preferredDate || 'Seleccionar fecha'}
                                         </Text>
-                                        <Text style={styles.calendarIcon}>📅</Text>
+                                        <MinimalistIcons name="events" size={16} color="#C9A961" isActive={false} />
                                     </TouchableOpacity>
                                 </View>
 
@@ -394,7 +413,7 @@ const CollaborationDetailScreenNew = ({ collaboration, onBack, onRequest, curren
                             style={styles.closeButton}
                             onPress={() => setShowCalendar(false)}
                         >
-                            <Text style={styles.closeButtonText}>✕</Text>
+                            <MinimalistIcons name="close" size={24} color={'#888888'} isActive={false} />
                         </TouchableOpacity>
                     </View>
 
@@ -434,13 +453,16 @@ const CollaborationDetailScreenNew = ({ collaboration, onBack, onRequest, curren
 
     return (
         <View style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton} onPress={onBack}>
-                    <Text style={styles.backButtonText}>← Volver</Text>
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>{collaboration.business}</Text>
-            </View>
+            {/* Floating Back Button */}
+            <TouchableOpacity
+                style={styles.floatingBackButton}
+                onPress={onBack}
+            >
+                <View style={styles.backButtonContent}>
+                    <MinimalistIcons name="back" size={20} color="#000" isActive={false} />
+                    <Text style={styles.floatingBackButtonText}>Volver</Text>
+                </View>
+            </TouchableOpacity>
 
             <ScrollView style={styles.content}>
                 {/* Image Gallery */}
@@ -471,46 +493,48 @@ const CollaborationDetailScreenNew = ({ collaboration, onBack, onRequest, curren
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Contenido a Publicar</Text>
                     <Text style={styles.contentText}>{collaboration.contentRequired}</Text>
-                    <Text style={styles.deadlineText}>
-                        ⏰ Plazo para publicar: {collaboration.deadline}
-                    </Text>
+                    <View style={styles.deadlineRow}>
+                        <MinimalistIcons name="history" size={16} color="#C9A961" isActive={false} />
+                        <Text style={styles.deadlineText}>Plazo para publicar: {collaboration.deadline}</Text>
+                    </View>
+                    {collaboration.companyInstagram && (
+                        <TouchableOpacity 
+                            style={styles.instagramRow}
+                            onPress={() => {
+                                const instagramUrl = collaboration.companyInstagram.startsWith('@') 
+                                    ? `https://instagram.com/${collaboration.companyInstagram.substring(1)}`
+                                    : `https://instagram.com/${collaboration.companyInstagram}`;
+                                Linking.openURL(instagramUrl);
+                            }}
+                        >
+                            <MinimalistIcons name="instagram" size={16} color="#C9A961" isActive={false} />
+                            <Text style={styles.instagramText}>
+                                Etiqueta a: {collaboration.companyInstagram.startsWith('@') ? collaboration.companyInstagram : `@${collaboration.companyInstagram}`}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
 
                 {/* Requirements */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Requisitos</Text>
                     <View style={styles.requirementsList}>
-                        <Text style={styles.requirementItem}>
-                            👥 {collaboration.requirements}
-                        </Text>
-                        <Text style={styles.requirementItem}>
-                            👫 {collaboration.companions}
-                        </Text>
-                        <Text style={styles.requirementItem}>
-                            📍 {collaboration.city}
-                        </Text>
+                        <View style={styles.requirementRow}>
+                            <MinimalistIcons name="users" size={16} color="#888888" isActive={false} />
+                            <Text style={styles.requirementItem}>{collaboration.requirements}</Text>
+                        </View>
+                        <View style={styles.requirementRow}>
+                            <MinimalistIcons name="users" size={16} color="#888888" isActive={false} />
+                            <Text style={styles.requirementItem}>{collaboration.companions}</Text>
+                        </View>
+                        <View style={styles.requirementRow}>
+                            <MinimalistIcons name="location" size={16} color="#888888" isActive={false} />
+                            <Text style={styles.requirementItem}>{collaboration.city}</Text>
+                        </View>
                     </View>
                 </View>
 
-                {/* Eligibility Status */}
-                {currentUser && (
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Estado de Elegibilidad</Text>
-                        {canRequest ? (
-                            <View style={styles.eligibleBadge}>
-                                <Text style={styles.eligibleText}>
-                                    ✅ Cumples todos los requisitos
-                                </Text>
-                            </View>
-                        ) : (
-                            <View style={styles.ineligibleBadge}>
-                                <Text style={styles.ineligibleText}>
-                                    ❌ Necesitas {collaboration.minFollowers} seguidores mínimo
-                                </Text>
-                            </View>
-                        )}
-                    </View>
-                )}
+
 
                 {/* Map */}
                 {renderMap()}
@@ -518,15 +542,20 @@ const CollaborationDetailScreenNew = ({ collaboration, onBack, onRequest, curren
                 {/* Contact Info */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Información de Contacto</Text>
-                    <Text style={styles.contactText}>📍 {collaboration.address}</Text>
+                    <View style={styles.contactRow}>
+                        <MinimalistIcons name="location" size={16} color="#888888" isActive={false} />
+                        <Text style={styles.contactText}>{collaboration.address}</Text>
+                    </View>
                     {collaboration.phone && (
-                        <TouchableOpacity onPress={callBusiness}>
-                            <Text style={styles.contactLink}>📞 {collaboration.phone}</Text>
+                        <TouchableOpacity style={styles.contactRow} onPress={callBusiness}>
+                            <MinimalistIcons name="phone" size={16} color="#C9A961" isActive={false} />
+                            <Text style={styles.contactLink}>{collaboration.phone}</Text>
                         </TouchableOpacity>
                     )}
                     {collaboration.email && (
-                        <TouchableOpacity onPress={() => Linking.openURL(`mailto:${collaboration.email}`)}>
-                            <Text style={styles.contactLink}>📧 {collaboration.email}</Text>
+                        <TouchableOpacity style={styles.contactRow} onPress={() => Linking.openURL(`mailto:${collaboration.email}`)}>
+                            <MinimalistIcons name="message" size={16} color="#C9A961" isActive={false} />
+                            <Text style={styles.contactLink}>{collaboration.email}</Text>
                         </TouchableOpacity>
                     )}
                 </View>
@@ -538,23 +567,29 @@ const CollaborationDetailScreenNew = ({ collaboration, onBack, onRequest, curren
             {/* Fixed Request Button */}
             <View style={styles.fixedButtonContainer}>
                 <TouchableOpacity
-                    style={[styles.requestButton, !canRequest && styles.disabledButton]}
+                    style={styles.requestButton}
                     onPress={handleRequest}
-                    disabled={!canRequest}
                 >
                     <LinearGradient
-                        colors={canRequest ? ['#C9A961', '#D4AF37'] : ['#666666', '#555555']}
+                        colors={['#C9A961', '#D4AF37']}
                         style={styles.requestGradient}
                     >
-                        <Text style={styles.requestButtonText}>
-                            {canRequest ? 'Solicitar Colaboración' : 'No Elegible'}
-                        </Text>
+                        <Text style={styles.requestButtonText}>Solicitar Colaboración</Text>
                     </LinearGradient>
                 </TouchableOpacity>
             </View>
 
             {renderRequestModal()}
             {renderCalendarModal()}
+
+            {/* New Collaboration Request Screen */}
+            <CollaborationRequestScreen
+                visible={showRequestScreen}
+                collaboration={collaboration}
+                currentUser={currentUser}
+                onClose={() => setShowRequestScreen(false)}
+                onSubmitRequest={handleSubmitRequest}
+            />
         </View>
     );
 };
@@ -563,29 +598,37 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#000000',
+        paddingBottom: 80, // Espacio para la barra de navegación inferior
     },
-    header: {
+    floatingBackButton: {
+        position: 'absolute',
+        top: 60, // Posición más accesible
+        left: 20,
+        zIndex: 1000,
+        backgroundColor: '#C9A961',
+        borderRadius: 25,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 15,
-        backgroundColor: '#111111',
-        borderBottomWidth: 1,
-        borderBottomColor: '#333333',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
-    backButton: {
-        marginRight: 15,
+    backButtonContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
-    backButtonText: {
-        color: '#C9A961',
-        fontSize: 16,
-        fontFamily: 'Inter',
-    },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#FFFFFF',
-        flex: 1,
+    floatingBackButtonText: {
+        color: '#000',
+        fontSize: 14,
+        fontWeight: '600',
+        marginLeft: 6,
         fontFamily: 'Inter',
     },
     content: {
@@ -641,6 +684,19 @@ const styles = StyleSheet.create({
         marginBottom: 4,
         fontFamily: 'Inter',
     },
+    instagramRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+        paddingVertical: 4,
+    },
+    instagramText: {
+        fontSize: 14,
+        color: '#C9A961',
+        marginLeft: 8,
+        fontFamily: 'Inter',
+        fontWeight: '500',
+    },
     collaborationTitle: {
         fontSize: 18,
         color: '#C9A961',
@@ -690,52 +746,34 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         fontFamily: 'Inter',
     },
+    deadlineRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
+    },
     deadlineText: {
         fontSize: 12,
         color: '#C9A961',
         fontStyle: 'italic',
         fontFamily: 'Inter',
+        marginLeft: 8,
     },
     requirementsList: {
         gap: 8,
+    },
+    requirementRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     requirementItem: {
         fontSize: 14,
         color: '#CCCCCC',
         fontFamily: 'Inter',
+        marginLeft: 8,
+        flex: 1,
     },
 
-    // Eligibility
-    eligibleBadge: {
-        backgroundColor: 'rgba(76, 175, 80, 0.2)',
-        borderWidth: 1,
-        borderColor: '#4CAF50',
-        borderRadius: 8,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-    },
-    eligibleText: {
-        color: '#4CAF50',
-        fontSize: 14,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        fontFamily: 'Inter',
-    },
-    ineligibleBadge: {
-        backgroundColor: 'rgba(244, 67, 54, 0.2)',
-        borderWidth: 1,
-        borderColor: '#F44336',
-        borderRadius: 8,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-    },
-    ineligibleText: {
-        color: '#F44336',
-        fontSize: 14,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        fontFamily: 'Inter',
-    },
+
 
     // Map Section
     mapSection: {
@@ -783,40 +821,59 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 8,
     },
+    mapButtonContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     mapButtonText: {
         color: '#C9A961',
         fontSize: 12,
         fontWeight: 'bold',
         fontFamily: 'Inter',
+        marginLeft: 4,
+    },
+    addressRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
     },
     addressText: {
         fontSize: 14,
         color: '#CCCCCC',
         fontFamily: 'Inter',
+        marginLeft: 8,
+        flex: 1,
     },
 
     // Contact
+    contactRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
     contactText: {
         fontSize: 14,
         color: '#CCCCCC',
-        marginBottom: 8,
         fontFamily: 'Inter',
+        marginLeft: 8,
+        flex: 1,
     },
     contactLink: {
         fontSize: 14,
         color: '#C9A961',
-        marginBottom: 4,
         textDecorationLine: 'underline',
         fontFamily: 'Inter',
+        marginLeft: 8,
+        flex: 1,
     },
 
     // Fixed Button
     bottomSpacer: {
-        height: 100,
+        height: 120, // Espacio para el botón fijo y navegación
     },
     fixedButtonContainer: {
         position: 'absolute',
-        bottom: 0,
+        bottom: 80, // Posicionado arriba de la barra de navegación
         left: 0,
         right: 0,
         backgroundColor: '#000000',
@@ -829,9 +886,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         overflow: 'hidden',
     },
-    disabledButton: {
-        opacity: 0.6,
-    },
+
     requestGradient: {
         paddingVertical: 16,
         alignItems: 'center',
@@ -946,9 +1001,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: 'Inter',
     },
-    calendarIcon: {
-        fontSize: 16,
-    },
+
     companionsSelector: {
         flexDirection: 'row',
         gap: 12,

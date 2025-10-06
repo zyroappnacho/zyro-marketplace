@@ -1,0 +1,74 @@
+{
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.suggest.autoImports": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  
+  "files.associations": {
+    "*.tsx": "typescriptreact",
+    "*.ts": "typescript"
+  },
+  
+  "emmet.includeLanguages": {
+    "typescript": "html",
+    "typescriptreact": "html"
+  },
+  
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/coverage": true,
+    "**/.expo": true,
+    "**/dist": true,
+    "**/build": true
+  },
+  
+  "files.exclude": {
+    "**/.expo": true,
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/coverage": true
+  },
+  
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "*.ts": "${capture}.js",
+    "*.tsx": "${capture}.js",
+    "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml",
+    "tsconfig.json": "tsconfig.*.json",
+    ".eslintrc.js": ".eslintignore, .prettierrc, .prettierignore",
+    "app.config.js": "app.config.*.js, eas.json, expo-env.d.ts"
+  },
+  
+  "jest.autoRun": "off",
+  "jest.showCoverageOnLoad": false,
+  
+  "reactNativeTools.showUserTips": false,
+  "reactNativeTools.projectRoot": "./",
+  
+  "git.ignoreLimitWarning": true,
+  
+  "terminal.integrated.env.osx": {
+    "NODE_ENV": "development"
+  },
+  
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#C9A961",
+    "activityBar.foreground": "#000000",
+    "statusBar.background": "#A68B47",
+    "statusBar.foreground": "#FFFFFF"
+  }
+}

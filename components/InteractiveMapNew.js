@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import MinimalistIcons from './MinimalistIcons';
 import {
     View,
     Text,
     StyleSheet,
     Dimensions,
     TouchableOpacity,
-    Modal,
-    ScrollView,
-    Image,
     Alert,
-    Platform
+    Platform,
+    Linking
 } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
@@ -31,8 +30,6 @@ const MADRID_COORDINATES = {
 };
 
 const InteractiveMapNew = ({ collaborations = [], onMarkerPress, currentUser }) => {
-    const [selectedMarker, setSelectedMarker] = useState(null);
-    const [showDetails, setShowDetails] = useState(false);
     const [mapRegion, setMapRegion] = useState(SPAIN_REGION);
 
     // Add coordinates to collaborations if they don't have them
@@ -44,199 +41,122 @@ const InteractiveMapNew = ({ collaborations = [], onMarkerPress, currentUser }) 
         }
     }));
 
-    const handleMarkerPress = (collaboration) => {
-        setSelectedMarker(collaboration);
-        setShowDetails(true);
+
+
+    const openAppleMaps = async (collaboration) => {
+        console.log('🗺️ Abriendo Apple Maps para:', collaboration.business);
+
+        const { latitude, longitude } = collaboration.coordinates;
+        const businessName = collaboration.business || 'Colaboración';
+
+        console.log('📍 Coordenadas:', latitude, longitude);
+
+        // URL simple y directa para Apple Maps
+        const appleMapUrl = `http://maps.apple.com/?daddr=${latitude},${longitude}&dirflg=d`;
+
+        console.log('🔗 URL generada:', appleMapUrl);
+
+        try {
+            console.log('🚀 Intentando abrir Apple Maps...');
+            await Linking.openURL(appleMapUrl);
+            console.log('✅ Apple Maps abierto exitosamente');
+        } catch (error) {
+            console.error('❌ Error abriendo Apple Maps:', error);
+            Alert.alert(
+                'Error',
+                'No se pudo abrir Apple Maps. Verifica tu conexión a internet.',
+                [{ text: 'OK' }]
+            );
+        }
     };
 
-    const handleViewDetails = () => {
-        setShowDetails(false);
-        if (onMarkerPress && selectedMarker) {
-            onMarkerPress(selectedMarker);
+    const formatFollowers = (followers) => {
+        if (followers >= 1000000) {
+            return `${(followers / 1000000).toFixed(1)}M`;
+        } else if (followers >= 1000) {
+            return `${(followers / 1000).toFixed(1)}K`;
         }
+        return followers.toString();
     };
 
     const renderMarker = (collaboration) => (
         <Marker
             key={collaboration.id}
             coordinate={collaboration.coordinates}
-            onPress={() => handleMarkerPress(collaboration)}
         >
             <View style={styles.markerContainer}>
                 <LinearGradient
                     colors={['#C9A961', '#D4AF37']}
                     style={styles.marker}
                 >
-                    <Text style={styles.markerText}>🏪</Text>
+                    <MinimalistIcons 
+                        name="location" 
+                        size={20} 
+                        color="#444444" 
+                        strokeWidth={2.5}
+                    />
                 </LinearGradient>
             </View>
+
+            <Callout
+                tooltip={true}
+                onPress={() => {
+                    console.log('📍 Abriendo dirección para:', collaboration.business);
+                    openAppleMaps(collaboration);
+                }}
+            >
+                <View style={styles.callout}>
+                    {/* Header */}
+                    <View style={styles.calloutHeader}>
+                        <Text style={styles.calloutTitle} numberOfLines={1}>
+                            {collaboration.title}
+                        </Text>
+                        <Text style={styles.calloutBusiness} numberOfLines={1}>
+                            {collaboration.business}
+                        </Text>
+                    </View>
+
+                    {/* Quick Info */}
+                    <View style={styles.calloutInfo}>
+                        <View style={styles.calloutInfoItem}>
+                            <Text style={styles.calloutInfoLabel}>Seguidores mín:</Text>
+                            <Text style={styles.calloutInfoValue}>
+                                {formatFollowers(collaboration.minFollowers)}
+                            </Text>
+                        </View>
+
+                        <View style={styles.calloutInfoItem}>
+                            <Text style={styles.calloutInfoLabel}>Acompañantes:</Text>
+                            <Text style={styles.calloutInfoValue}>
+                                {collaboration.companions}
+                            </Text>
+                        </View>
+
+                        <View style={styles.calloutInfoItem}>
+                            <Text style={styles.calloutInfoLabel}>Categoría:</Text>
+                            <Text style={styles.calloutInfoValue}>
+                                {collaboration.category}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* New Address Button */}
+                    <View style={styles.addressButton}>
+                        <LinearGradient
+                            colors={['#C9A961', '#D4AF37']}
+                            style={styles.addressButtonGradient}
+                        >
+                            <Text style={styles.addressButtonText}>
+                                📍 Dirección
+                            </Text>
+                        </LinearGradient>
+                    </View>
+                </View>
+            </Callout>
         </Marker>
     );
 
-    const renderDetailsModal = () => (
-        <Modal
-            visible={showDetails}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={() => setShowDetails(false)}
-        >
-            <View style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
-                    {selectedMarker && (
-                        <>
-                            <View style={styles.modalHeader}>
-                                <Text style={styles.modalTitle}>{selectedMarker.title}</Text>
-                                <TouchableOpacity
-                                    style={styles.closeButton}
-                                    onPress={() => setShowDetails(false)}
-                                >
-                                    <Text style={styles.closeButtonText}>✕</Text>
-                                </TouchableOpacity>
-                            </View>
 
-                            <ScrollView style={styles.modalBody}>
-                                {/* Business Image */}
-                                <View style={styles.imageContainer}>
-                                    <Image
-                                        source={{ uri: selectedMarker.images[0] }}
-                                        style={styles.businessImage}
-                                        resizeMode="cover"
-                                    />
-                                </View>
-
-                                {/* Business Info */}
-                                <View style={styles.businessInfo}>
-                                    <Text style={styles.businessName}>
-                                        {selectedMarker.business}
-                                    </Text>
-                                    <Text style={styles.businessCategory}>
-                                        {selectedMarker.category.toUpperCase()}
-                                    </Text>
-                                    <Text style={styles.businessCity}>
-                                        📍 {selectedMarker.city}
-                                    </Text>
-                                </View>
-
-                                {/* Description */}
-                                <View style={styles.descriptionSection}>
-                                    <Text style={styles.sectionTitle}>Descripción</Text>
-                                    <Text style={styles.descriptionText}>
-                                        {selectedMarker.description}
-                                    </Text>
-                                </View>
-
-                                {/* Requirements */}
-                                <View style={styles.requirementsSection}>
-                                    <Text style={styles.sectionTitle}>Requisitos</Text>
-                                    <View style={styles.requirementItem}>
-                                        <Text style={styles.requirementText}>
-                                            👥 {selectedMarker.requirements}
-                                        </Text>
-                                    </View>
-                                    <View style={styles.requirementItem}>
-                                        <Text style={styles.requirementText}>
-                                            👫 {selectedMarker.companions}
-                                        </Text>
-                                    </View>
-                                </View>
-
-                                {/* What's Included */}
-                                <View style={styles.includesSection}>
-                                    <Text style={styles.sectionTitle}>Qué Incluye</Text>
-                                    <Text style={styles.includesText}>
-                                        {selectedMarker.whatIncludes}
-                                    </Text>
-                                </View>
-
-                                {/* Content Required */}
-                                <View style={styles.contentSection}>
-                                    <Text style={styles.sectionTitle}>Contenido Requerido</Text>
-                                    <Text style={styles.contentText}>
-                                        {selectedMarker.contentRequired}
-                                    </Text>
-                                    <Text style={styles.deadlineText}>
-                                        ⏰ Plazo: {selectedMarker.deadline}
-                                    </Text>
-                                </View>
-
-                                {/* Location Info */}
-                                <View style={styles.locationSection}>
-                                    <Text style={styles.sectionTitle}>Ubicación</Text>
-                                    <Text style={styles.addressText}>
-                                        📍 {selectedMarker.address}
-                                    </Text>
-                                    {selectedMarker.phone && (
-                                        <TouchableOpacity style={styles.contactButton}>
-                                            <Text style={styles.contactButtonText}>
-                                                📞 {selectedMarker.phone}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    )}
-                                </View>
-
-                                {/* Eligibility Check */}
-                                {currentUser && (
-                                    <View style={styles.eligibilitySection}>
-                                        {currentUser.instagramFollowers >= selectedMarker.minFollowers ? (
-                                            <View style={styles.eligibleBadge}>
-                                                <Text style={styles.eligibleText}>
-                                                    ✅ Cumples los requisitos
-                                                </Text>
-                                            </View>
-                                        ) : (
-                                            <View style={styles.ineligibleBadge}>
-                                                <Text style={styles.ineligibleText}>
-                                                    ❌ Necesitas {selectedMarker.minFollowers} seguidores mínimo
-                                                </Text>
-                                            </View>
-                                        )}
-                                    </View>
-                                )}
-                            </ScrollView>
-
-                            {/* Action Buttons */}
-                            <View style={styles.modalActions}>
-                                <TouchableOpacity
-                                    style={styles.detailsButton}
-                                    onPress={handleViewDetails}
-                                >
-                                    <LinearGradient
-                                        colors={['#C9A961', '#D4AF37']}
-                                        style={styles.buttonGradient}
-                                    >
-                                        <Text style={styles.detailsButtonText}>
-                                            Ver Detalles Completos
-                                        </Text>
-                                    </LinearGradient>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    style={styles.directionsButton}
-                                    onPress={() => {
-                                        const { latitude, longitude } = selectedMarker.coordinates;
-                                        const url = Platform.select({
-                                            ios: `maps:0,0?q=${latitude},${longitude}`,
-                                            android: `geo:0,0?q=${latitude},${longitude}`
-                                        });
-                                        
-                                        if (url) {
-                                            Linking.openURL(url).catch(() => {
-                                                Alert.alert('Error', 'No se pudo abrir la aplicación de mapas');
-                                            });
-                                        }
-                                    }}
-                                >
-                                    <Text style={styles.directionsButtonText}>
-                                        🧭 Obtener Direcciones
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </>
-                    )}
-                </View>
-            </View>
-        </Modal>
-    );
 
     return (
         <View style={styles.container}>
@@ -282,7 +202,7 @@ const InteractiveMapNew = ({ collaborations = [], onMarkerPress, currentUser }) 
                         longitudeDelta: 0.1,
                     })}
                 >
-                    <Text style={styles.controlButtonText}>📍</Text>
+                    <MinimalistIcons name="location" size={24} color={'#888888'} isActive={false} />
                 </TouchableOpacity>
             </View>
 
@@ -294,14 +214,19 @@ const InteractiveMapNew = ({ collaborations = [], onMarkerPress, currentUser }) 
                             colors={['#C9A961', '#D4AF37']}
                             style={styles.legendMarkerIcon}
                         >
-                            <Text style={styles.legendMarkerText}>🏪</Text>
+                            <MinimalistIcons 
+                                name="location" 
+                                size={12} 
+                                color="#444444" 
+                                strokeWidth={2}
+                            />
                         </LinearGradient>
                     </View>
                     <Text style={styles.legendText}>Colaboración disponible</Text>
                 </View>
             </View>
 
-            {renderDetailsModal()}
+
         </View>
     );
 };
@@ -589,9 +514,7 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
         elevation: 5,
     },
-    markerText: {
-        fontSize: 16,
-    },
+
     mapControls: {
         position: 'absolute',
         top: 80,
@@ -644,227 +567,87 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    legendMarkerText: {
-        fontSize: 12,
-    },
+
     legendText: {
         color: '#CCCCCC',
         fontSize: 12,
         fontFamily: 'Inter',
     },
 
-    // Modal Styles
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        justifyContent: 'flex-end',
+    // Callout Styles
+    callout: {
+        backgroundColor: 'rgba(17, 17, 17, 0.95)',
+        borderRadius: 16,
+        padding: 16,
+        borderWidth: 2,
+        borderColor: '#C9A961',
+        shadowColor: '#C9A961',
+        shadowOffset: {
+            width: 0,
+            height: 8,
+        },
+        shadowOpacity: 0.4,
+        shadowRadius: 12,
+        elevation: 12,
+        width: 260,
+        minHeight: 140,
     },
-    modalContent: {
-        backgroundColor: '#111111',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        maxHeight: height * 0.8,
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingVertical: 15,
+    calloutHeader: {
+        marginBottom: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#333333',
+        borderBottomColor: 'rgba(201, 169, 97, 0.3)',
+        paddingBottom: 8,
     },
-    modalTitle: {
-        fontSize: 20,
+    calloutTitle: {
+        fontSize: 17,
         fontWeight: 'bold',
         color: '#C9A961',
-        flex: 1,
+        marginBottom: 4,
+        fontFamily: 'Inter',
+        textAlign: 'center',
+    },
+    calloutBusiness: {
+        fontSize: 14,
+        color: '#FFFFFF',
+        fontFamily: 'Inter',
+        textAlign: 'center',
+        opacity: 0.9,
+    },
+    calloutInfo: {
+        marginBottom: 12,
+    },
+    calloutInfoItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 6,
+        paddingHorizontal: 4,
+    },
+    calloutInfoLabel: {
+        fontSize: 12,
+        color: 'rgba(255, 255, 255, 0.7)',
         fontFamily: 'Inter',
     },
-    closeButton: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        backgroundColor: '#333333',
+    calloutInfoValue: {
+        fontSize: 12,
+        color: '#C9A961',
+        fontWeight: '600',
+        fontFamily: 'Inter',
+    },
+    addressButton: {
+        borderRadius: 12,
+        overflow: 'hidden',
+        marginTop: 4,
+    },
+    addressButtonGradient: {
+        paddingVertical: 12,
+        paddingHorizontal: 16,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    closeButtonText: {
-        color: '#FFFFFF',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    modalBody: {
-        flex: 1,
-        paddingHorizontal: 20,
-    },
-    imageContainer: {
-        marginVertical: 15,
-        borderRadius: 12,
-        overflow: 'hidden',
-    },
-    businessImage: {
-        width: '100%',
-        height: 200,
-    },
-    businessInfo: {
-        marginBottom: 20,
-    },
-    businessName: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#FFFFFF',
-        marginBottom: 4,
-        fontFamily: 'Inter',
-    },
-    businessCategory: {
-        fontSize: 14,
-        color: '#C9A961',
-        marginBottom: 4,
-        fontFamily: 'Inter',
-    },
-    businessCity: {
-        fontSize: 14,
-        color: '#CCCCCC',
-        fontFamily: 'Inter',
-    },
-    descriptionSection: {
-        marginBottom: 20,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#C9A961',
-        marginBottom: 8,
-        fontFamily: 'Inter',
-    },
-    descriptionText: {
-        fontSize: 14,
-        color: '#CCCCCC',
-        lineHeight: 20,
-        fontFamily: 'Inter',
-    },
-    requirementsSection: {
-        marginBottom: 20,
-    },
-    requirementItem: {
-        marginBottom: 4,
-    },
-    requirementText: {
-        fontSize: 14,
-        color: '#CCCCCC',
-        fontFamily: 'Inter',
-    },
-    includesSection: {
-        marginBottom: 20,
-    },
-    includesText: {
-        fontSize: 14,
-        color: '#CCCCCC',
-        lineHeight: 20,
-        fontFamily: 'Inter',
-    },
-    contentSection: {
-        marginBottom: 20,
-    },
-    contentText: {
-        fontSize: 14,
-        color: '#CCCCCC',
-        marginBottom: 8,
-        fontFamily: 'Inter',
-    },
-    deadlineText: {
-        fontSize: 12,
-        color: '#C9A961',
-        fontStyle: 'italic',
-        fontFamily: 'Inter',
-    },
-    locationSection: {
-        marginBottom: 20,
-    },
-    addressText: {
-        fontSize: 14,
-        color: '#CCCCCC',
-        marginBottom: 8,
-        fontFamily: 'Inter',
-    },
-    contactButton: {
-        backgroundColor: '#333333',
-        borderRadius: 8,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        alignSelf: 'flex-start',
-    },
-    contactButtonText: {
-        color: '#C9A961',
-        fontSize: 14,
-        fontFamily: 'Inter',
-    },
-    eligibilitySection: {
-        marginBottom: 20,
-    },
-    eligibleBadge: {
-        backgroundColor: 'rgba(76, 175, 80, 0.2)',
-        borderWidth: 1,
-        borderColor: '#4CAF50',
-        borderRadius: 8,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-    },
-    eligibleText: {
-        color: '#4CAF50',
-        fontSize: 14,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        fontFamily: 'Inter',
-    },
-    ineligibleBadge: {
-        backgroundColor: 'rgba(244, 67, 54, 0.2)',
-        borderWidth: 1,
-        borderColor: '#F44336',
-        borderRadius: 8,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-    },
-    ineligibleText: {
-        color: '#F44336',
-        fontSize: 14,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        fontFamily: 'Inter',
-    },
-    modalActions: {
-        paddingHorizontal: 20,
-        paddingVertical: 15,
-        borderTopWidth: 1,
-        borderTopColor: '#333333',
-    },
-    detailsButton: {
-        marginBottom: 10,
-        borderRadius: 12,
-        overflow: 'hidden',
-    },
-    buttonGradient: {
-        paddingVertical: 16,
-        alignItems: 'center',
-    },
-    detailsButtonText: {
+    addressButtonText: {
         color: '#000000',
-        fontSize: 16,
-        fontWeight: 'bold',
-        fontFamily: 'Inter',
-    },
-    directionsButton: {
-        backgroundColor: '#333333',
-        borderWidth: 1,
-        borderColor: '#C9A961',
-        borderRadius: 12,
-        paddingVertical: 16,
-        alignItems: 'center',
-    },
-    directionsButtonText: {
-        color: '#C9A961',
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: 'bold',
         fontFamily: 'Inter',
     },

@@ -7,8 +7,8 @@ const initialState = {
   selectedCity: 'Madrid',
   selectedCategory: 'all',
   modals: {
-    cityModal: false,
-    categoryModal: false,
+    citySelector: false,
+    categorySelector: false,
     datePickerModal: false,
     filterModal: false,
     profileModal: false

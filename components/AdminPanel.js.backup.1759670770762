@@ -1,0 +1,3033 @@
+import React, { useState, useEffect } from 'react';
+import MinimalistIcons from './MinimalistIcons';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    StyleSheet,
+    ScrollView,
+    Alert,
+    SafeAreaView,
+    TextInput,
+    Modal,
+    FlatList,
+    Dimensions,
+    Switch
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+    setCurrentSection,
+    setDashboardData,
+    setCompanies,
+    setPendingInfluencers,
+    approveInfluencer,
+    rejectInfluencer,
+    setApprovedInfluencers,
+    deleteInfluencerAccount,
+    deleteCompanyAccount,
+    setCampaigns,
+    addCampaign,
+    updateCampaign,
+    deleteCampaign,
+
+    toggleModal,
+    setLoading
+} from '../store/slices/adminSlice';
+import StorageService from '../services/StorageService';
+import { clearAdminPasswordCache } from '../utils/adminPasswordCache';
+import AdminService from '../services/AdminService';
+import CitiesService from '../services/CitiesService';
+import EventBusService, { CITIES_EVENTS } from '../services/EventBusService';
+import AdminCampaignManager from './AdminCampaignManager';
+import AdminRequestsManager from './AdminRequestsManager';
+import AdminInfluencerScreenshots from './AdminInfluencerScreenshots';
+import AdminCompanyDetailScreen from './AdminCompanyDetailScreen';
+import AdminCategoriesManager from './AdminCategoriesManager';
+import AdminCompanyLocationsScreen from './AdminCompanyLocationsScreen';
+import { ejecutarLimpiezaAutomatica } from '../EJECUTAR_LIMPIEZA_DUPLICADOS_AUTOMATICA';
+
+const { width, height } = Dimensions.get('window');
+
+const AdminPanel = ({ navigation }) => {
+    const dispatch = useDispatch();
+    const { user: currentUser } = useSelector(state => state.auth);
+    const {
+        dashboard,
+        companies,
+        influencers,
+        campaigns,
+        settings,
+        ui
+    } = useSelector(state => state.admin);
+
+    // Local state
+    const [dashboardSubsection, setDashboardSubsection] = useState('administrative'); // 'administrative' or 'financial'
+    const [currentView, setCurrentView] = useState('main'); // 'main', 'companyDetail', or 'companyLocations'
+    const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+    const [selectedCompanyName, setSelectedCompanyName] = useState('');
+    const [newCampaign, setNewCampaign] = useState({
+        title: '',
+        business: '',
+        category: 'restaurantes',
+        city: 'Madrid',
+        description: '',
+        requirements: '',
+        companions: '',
+        whatIncludes: '',
+        contentRequired: '',
+        deadline: '',
+        address: '',
+        phone: '',
+        email: '',
+        companyInstagram: '',
+        minFollowers: '',
+        estimatedReach: '',
+        engagement: ''
+    });
+
+    const [selectedInfluencer, setSelectedInfluencer] = useState(null);
+    const [rejectionReason, setRejectionReason] = useState('');
+    const [showCampaignManager, setShowCampaignManager] = useState(false);
+    const [showScreenshots, setShowScreenshots] = useState(false);
+    const [selectedInfluencerForScreenshots, setSelectedInfluencerForScreenshots] = useState(null);
+    const [influencerSection, setInfluencerSection] = useState('pending'); // 'pending' or 'approved'
+    const [selectedInfluencerForDeletion, setSelectedInfluencerForDeletion] = useState(null);
+
+    // Password change state
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [changePasswordForm, setChangePasswordForm] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+    // Cities management state
+    const [cities, setCities] = useState([]);
+    const [showCityModal, setShowCityModal] = useState(false);
+    const [cityModalMode, setCityModalMode] = useState('add'); // 'add' or 'edit'
+    const [selectedCity, setSelectedCity] = useState(null);
+    const [cityForm, setCityForm] = useState({ name: '' });
+    const [isLoadingCities, setIsLoadingCities] = useState(false);
+
+
+
+    // Load admin data on component mount
+    useEffect(() => {
+        loadAdminData();
+        loadCitiesData();
+    }, []);
+
+
+
+    // FUNCIÓN: Convertir plan guardado al formato de visualización (MEJORADA - sincronizada con AdminCompanyDetailScreen)
+    const convertStoredPlanToDisplayFormat = (storedPlan, companyData) => {
+        console.log('🔄 [AdminPanel] Convirtiendo plan guardado al formato de visualización:', storedPlan);
+
+        // Mapear el plan guardado al formato de visualización
+        const planMappings = {
+            'plan_3_months': {
+                id: 'plan_3_months',
+                name: 'Plan 3 Meses',
+                price: 499,
+                duration: 3,
+                description: 'Perfecto para campañas cortas'
+            },
+            'plan_6_months': {
+                id: 'plan_6_months',
+                name: 'Plan 6 Meses',
+                price: 399,
+                duration: 6,
+                description: 'Ideal para estrategias a medio plazo'
+            },
+            'plan_12_months': {
+                id: 'plan_12_months',
+                name: 'Plan 12 Meses',
+                price: 299,
+                duration: 12,
+                description: 'Máximo ahorro para estrategias anuales'
+            }
+        };
+
+        // Si el plan guardado es un string simple, mapearlo
+        if (typeof storedPlan === 'string') {
+            const mappedPlan = planMappings[storedPlan];
+            if (mappedPlan) {
+                console.log('✅ [AdminPanel] Plan mapeado desde string:', storedPlan, '→', mappedPlan.name);
+                return {
+                    ...mappedPlan,
+                    totalPrice: mappedPlan.price * mappedPlan.duration,
+                    status: companyData.status || 'active'
+                };
+            }
+        }
+
+        // Si el plan ya es un objeto, usarlo directamente pero asegurar campos necesarios
+        if (typeof storedPlan === 'object' && storedPlan !== null) {
+            console.log('✅ [AdminPanel] Plan es objeto, usando directamente:', storedPlan);
+            const duration = storedPlan.duration || 6;
+            const price = storedPlan.price || 399;
+            return {
+                id: storedPlan.id || 'plan_6_months',
+                name: storedPlan.name || 'Plan Personalizado',
+                price: price,
+                duration: duration,
+                totalPrice: storedPlan.totalPrice || (price * duration),
+                description: storedPlan.description || 'Plan personalizado',
+                status: companyData.status || 'active'
+            };
+        }
+
+        // Fallback: detectar por precio mensual si está disponible
+        if (companyData.monthlyAmount) {
+            const monthlyPrice = Number(companyData.monthlyAmount);
+            console.log(`💰 [AdminPanel] Detectando por precio mensual: ${monthlyPrice}€`);
+
+            if (monthlyPrice === 499) {
+                console.log('✅ [AdminPanel] Plan detectado por precio: Plan 3 Meses (499€)');
+                return { ...planMappings['plan_3_months'], totalPrice: 499 * 3 };
+            }
+            if (monthlyPrice === 399) {
+                console.log('✅ [AdminPanel] Plan detectado por precio: Plan 6 Meses (399€)');
+                return { ...planMappings['plan_6_months'], totalPrice: 399 * 6 };
+            }
+            if (monthlyPrice === 299) {
+                console.log('✅ [AdminPanel] Plan detectado por precio: Plan 12 Meses (299€)');
+                return { ...planMappings['plan_12_months'], totalPrice: 299 * 12 };
+            }
+        }
+
+        // Fallback al plan por defecto
+        console.log('⚠️ [AdminPanel] Plan no reconocido, usando plan por defecto:', storedPlan);
+        return {
+            ...planMappings['plan_6_months'],
+            totalPrice: 399 * 6,
+            status: 'active'
+        };
+    };
+
+    // FUNCIÓN: Detectar estado de pago inteligente (misma lógica que AdminCompanyDetailScreen)
+    const getCompanyPaymentStatus = (companyData) => {
+        if (!companyData) return 'pending';
+
+        console.log('🔍 [AdminPanel] Detectando estado de pago para:', companyData.companyName);
+
+        // CRITERIO 1: Estado explícito de pago completado
+        if (companyData.status === 'payment_completed' || companyData.status === 'active') {
+            console.log('✅ [AdminPanel] Estado explícito: pago completado');
+            return 'completed';
+        }
+
+        // CRITERIO 2: Fecha de primer pago completado existe
+        if (companyData.firstPaymentCompletedDate || companyData.paymentCompletedDate) {
+            console.log('✅ [AdminPanel] Fecha de pago completado encontrada');
+            return 'completed';
+        }
+
+        // CRITERIO 3: Tiene plan seleccionado Y método de pago
+        if (companyData.selectedPlan && companyData.paymentMethodName && companyData.paymentMethodName !== 'No definido') {
+            console.log('✅ [AdminPanel] Plan y método de pago definidos - asumiendo pago completado');
+            return 'completed';
+        }
+
+        // CRITERIO 4: Tiene plan seleccionado Y precio mensual (proceso Stripe completado)
+        if (companyData.selectedPlan && companyData.monthlyAmount && companyData.monthlyAmount > 0) {
+            console.log('✅ [AdminPanel] Plan y precio definidos - proceso Stripe completado');
+            return 'completed';
+        }
+
+        // CRITERIO 5: Para entorno de prueba - plan válido
+        if (companyData.selectedPlan && (companyData.selectedPlan.includes('plan_') || companyData.selectedPlan.includes('Plan'))) {
+            console.log('✅ [AdminPanel] Plan válido detectado - entorno de prueba, asumiendo completado');
+            return 'completed';
+        }
+
+        console.log('⚠️ [AdminPanel] No se detectó pago completado - estado pendiente');
+        return 'pending';
+    };
+
+    // FUNCIÓN: Obtener estado de empresa para tarjetas
+    const getCompanyStatus = (company) => {
+        const paymentStatus = getCompanyPaymentStatus(company);
+        return paymentStatus === 'completed' ? 'active' : 'pending';
+    };
+
+    // FUNCIÓN: Obtener texto del estado de empresa
+    const getCompanyStatusText = (company) => {
+        const status = getCompanyStatus(company);
+        return status === 'active' ? 'Activa' : 'Pendiente';
+    };
+
+    // FUNCIÓN: Verificar si empresa está activa (para cálculos de dashboard)
+    const isCompanyActive = (company) => {
+        return getCompanyPaymentStatus(company) === 'completed';
+    };
+
+    // FUNCIÓN: Obtener información del plan para mostrar en tarjetas de empresa (MEJORADA)
+    const getCompanyDisplayPlan = (company) => {
+        if (!company) {
+            console.log('⚠️ [AdminPanel] No hay datos de empresa, usando plan por defecto');
+            return {
+                name: 'Plan 6 Meses',
+                price: 399,
+                duration: 6,
+                totalPrice: 2394
+            };
+        }
+
+        console.log('🔍 [AdminPanel] Obteniendo plan para empresa:', company.companyName);
+        console.log('📋 [AdminPanel] Datos disponibles:', {
+            selectedPlan: company.selectedPlan,
+            monthlyAmount: company.monthlyAmount,
+            planDuration: company.planDuration,
+            planId: company.planId
+        });
+
+        // PRIORIDAD 1: Usar la función de conversión con selectedPlan
+        if (company.selectedPlan) {
+            console.log('✅ [AdminPanel] Usando selectedPlan:', company.selectedPlan);
+            return convertStoredPlanToDisplayFormat(company.selectedPlan, company);
+        }
+
+        // PRIORIDAD 2: Detectar plan por precio mensual si está disponible
+        if (company.monthlyAmount) {
+            const price = Number(company.monthlyAmount);
+            const duration = company.planDuration || 6;
+
+            console.log(`💰 [AdminPanel] Detectando por precio mensual: ${price}€, duración: ${duration} meses`);
+
+            if (price === 499) {
+                console.log('✅ [AdminPanel] Plan detectado: Plan 3 Meses (499€)');
+                return { name: 'Plan 3 Meses', price: 499, duration: 3, totalPrice: 1497 };
+            }
+            if (price === 399) {
+                console.log('✅ [AdminPanel] Plan detectado: Plan 6 Meses (399€)');
+                return { name: 'Plan 6 Meses', price: 399, duration: 6, totalPrice: 2394 };
+            }
+            if (price === 299) {
+                console.log('✅ [AdminPanel] Plan detectado: Plan 12 Meses (299€)');
+                return { name: 'Plan 12 Meses', price: 299, duration: 12, totalPrice: 3588 };
+            }
+
+            // Si el precio no coincide con los estándar, usar el precio detectado
+            console.log(`⚠️ [AdminPanel] Precio no estándar detectado: ${price}€`);
+            return {
+                name: `Plan Personalizado (${duration} meses)`,
+                price: price,
+                duration: duration,
+                totalPrice: price * duration
+            };
+        }
+
+        // PRIORIDAD 3: Usar planId si está disponible
+        if (company.planId) {
+            console.log('✅ [AdminPanel] Usando planId:', company.planId);
+            return convertStoredPlanToDisplayFormat(company.planId, company);
+        }
+
+        // FALLBACK: Plan por defecto con datos disponibles
+        const fallbackPrice = 399;
+        const fallbackDuration = 6;
+
+        console.log('⚠️ [AdminPanel] Usando plan por defecto para empresa:', company.companyName);
+
+        return {
+            name: 'Plan 6 Meses',
+            price: fallbackPrice,
+            duration: fallbackDuration,
+            totalPrice: fallbackPrice * fallbackDuration
+        };
+    };
+
+    const loadAdminData = async () => {
+        try {
+            dispatch(setLoading({ section: 'dashboard', isLoading: true }));
+
+            // Load dashboard data
+            const dashboardData = await AdminService.getDashboardData();
+            if (dashboardData) {
+                dispatch(setDashboardData(dashboardData));
+            }
+
+            // Load companies with updated subscription data
+            let companiesData = await AdminService.getAllCompanies();
+
+            // 🛠️ SOLUCIÓN AUTOMÁTICA DE DUPLICADOS - EJECUTAR SIEMPRE
+            console.log('🔍 Ejecutando limpieza automática de duplicados...');
+            const limpiezaResult = await ejecutarLimpiezaAutomatica();
+
+            if (limpiezaResult.success && limpiezaResult.duplicadosEliminados > 0) {
+                console.log(`✅ ${limpiezaResult.duplicadosEliminados} duplicados eliminados automáticamente`);
+                // Recargar empresas después de la limpieza
+                companiesData = await AdminService.getAllCompanies();
+            }
+
+            // Enrich companies data with latest subscription information
+            if (companiesData && companiesData.length > 0) {
+                const enrichedCompanies = await Promise.all(
+                    companiesData.map(async (company) => {
+                        try {
+                            // Get latest subscription data
+                            const subscriptionData = await StorageService.getCompanySubscription(company.id);
+
+                            if (subscriptionData) {
+                                return {
+                                    ...company,
+                                    selectedPlan: subscriptionData.plan.name,
+                                    planId: subscriptionData.plan.id,
+                                    monthlyAmount: subscriptionData.plan.price,
+                                    totalAmount: subscriptionData.plan.totalPrice,
+                                    planDuration: subscriptionData.plan.duration,
+                                    paymentMethod: subscriptionData.paymentMethod,
+                                    paymentMethodName: subscriptionData.paymentMethod?.name || 'No definido',
+                                    nextBillingDate: subscriptionData.nextBillingDate,
+                                    subscriptionUpdatedAt: subscriptionData.updatedAt,
+                                    // Usar fecha de primer pago si está disponible, sino fecha de registro
+                                    firstPaymentCompletedDate: company.firstPaymentCompletedDate || company.paymentCompletedDate
+                                };
+                            }
+
+                            return company;
+                        } catch (error) {
+                            console.error(`Error loading subscription for company ${company.id}:`, error);
+                            return company;
+                        }
+                    })
+                );
+
+                dispatch(setCompanies(enrichedCompanies));
+            } else {
+                dispatch(setCompanies(companiesData));
+            }
+
+            // Load pending influencers
+            const pendingInfluencers = await AdminService.getPendingInfluencers();
+            dispatch(setPendingInfluencers(pendingInfluencers));
+
+            // Load approved influencers
+            const approvedInfluencers = await AdminService.getApprovedInfluencers();
+            dispatch(setApprovedInfluencers(approvedInfluencers));
+
+            // Load campaigns
+            const campaignsData = await AdminService.getAllCampaigns();
+            dispatch(setCampaigns(campaignsData));
+
+            dispatch(setLoading({ section: 'dashboard', isLoading: false }));
+        } catch (error) {
+            console.error('Error loading admin data:', error);
+            dispatch(setLoading({ section: 'dashboard', isLoading: false }));
+        }
+    };
+
+    // Handle influencer approval
+    const handleApproveInfluencer = async (influencerId) => {
+        try {
+            const result = await AdminService.approveInfluencer(influencerId);
+            if (result) {
+                dispatch(approveInfluencer(influencerId));
+                Alert.alert('Éxito', 'Influencer aprobado correctamente');
+                // Reload data to update counts
+                loadAdminData();
+            } else {
+                Alert.alert('Error', 'No se pudo aprobar el influencer');
+            }
+        } catch (error) {
+            Alert.alert('Error', 'No se pudo aprobar el influencer');
+        }
+    };
+
+    // Handle influencer rejection
+    const handleRejectInfluencer = async (influencerId, reason) => {
+        try {
+            const result = await AdminService.rejectInfluencer(influencerId, reason);
+            if (result) {
+                dispatch(rejectInfluencer({ influencerId, reason }));
+                Alert.alert('Influencer rechazado', 'El influencer ha sido rechazado');
+                setSelectedInfluencer(null);
+                setRejectionReason('');
+                // Reload data to update counts
+                loadAdminData();
+            } else {
+                Alert.alert('Error', 'No se pudo rechazar el influencer');
+            }
+        } catch (error) {
+            Alert.alert('Error', 'No se pudo rechazar el influencer');
+        }
+    };
+
+    // Handle campaign creation
+    const handleCreateCampaign = async () => {
+        if (!newCampaign.title || !newCampaign.business || !newCampaign.description) {
+            Alert.alert('Error', 'Por favor completa los campos obligatorios');
+            return;
+        }
+
+        try {
+            const campaign = {
+                id: Date.now(),
+                ...newCampaign,
+                status: 'active',
+                createdAt: new Date().toISOString(),
+                coordinates: { latitude: 40.4168, longitude: -3.7038 } // Default Madrid coordinates
+            };
+
+            const result = await AdminService.saveCampaign(campaign);
+            if (result) {
+                dispatch(addCampaign(campaign));
+
+                // Reset form
+                setNewCampaign({
+                    title: '',
+                    business: '',
+                    category: 'restaurantes',
+                    city: 'Madrid',
+                    description: '',
+                    requirements: '',
+                    companions: '',
+                    whatIncludes: '',
+                    contentRequired: '',
+                    deadline: '',
+                    address: '',
+                    phone: '',
+                    email: '',
+                    companyInstagram: '',
+                    minFollowers: '',
+                    estimatedReach: '',
+                    engagement: ''
+                });
+
+                Alert.alert('Éxito', 'Campaña creada correctamente');
+                // Reload data to update counts
+                loadAdminData();
+            } else {
+                Alert.alert('Error', 'No se pudo crear la campaña');
+            }
+        } catch (error) {
+            Alert.alert('Error', 'No se pudo crear la campaña');
+        }
+    };
+
+    // Handle influencer account deletion (GDPR Compliant)
+    const handleDeleteInfluencerAccount = async (influencerId, influencerName) => {
+        try {
+            // Show GDPR confirmation dialog
+            Alert.alert(
+                '🗑️ Eliminar Cuenta (GDPR)',
+                `¿Estás seguro de que quieres eliminar PERMANENTEMENTE la cuenta de ${influencerName}?\n\n⚠️ ADVERTENCIA GDPR:\n• Todos los datos personales serán borrados\n• Las credenciales de acceso serán eliminadas\n• Esta acción NO se puede deshacer\n• Cumple con el derecho al olvido (GDPR)\n\nEsta es una eliminación completa y definitiva.`,
+                [
+                    {
+                        text: 'Cancelar',
+                        style: 'cancel'
+                    },
+                    {
+                        text: '🗑️ Eliminar Permanentemente',
+                        style: 'destructive',
+                        onPress: async () => {
+                            try {
+                                console.log(`🗑️ Iniciando eliminación GDPR para: ${influencerName}`);
+
+                                const result = await AdminService.deleteInfluencerAccount(influencerId);
+
+                                if (result.success) {
+                                    dispatch(deleteInfluencerAccount(influencerId));
+
+                                    // Show GDPR compliance confirmation
+                                    Alert.alert(
+                                        '✅ Eliminación GDPR Completada',
+                                        `La cuenta de ${influencerName} ha sido eliminada permanentemente.\n\n🔒 GDPR Compliance:\n• ✅ Datos personales borrados\n• ✅ Credenciales eliminadas\n• ✅ Referencias limpiadas\n• ✅ Acceso revocado\n\nEl usuario ya no puede acceder a la aplicación.`,
+                                        [{ text: 'Entendido', style: 'default' }]
+                                    );
+
+                                    setSelectedInfluencerForDeletion(null);
+                                    // Reload data to update counts
+                                    loadAdminData();
+                                } else {
+                                    Alert.alert('❌ Error en Eliminación GDPR', result.message);
+                                }
+                            } catch (error) {
+                                console.error('Error en eliminación GDPR:', error);
+                                Alert.alert('❌ Error', 'No se pudo completar la eliminación GDPR');
+                            }
+                        }
+                    }
+                ]
+            );
+        } catch (error) {
+            Alert.alert('❌ Error', 'No se pudo iniciar la eliminación de la cuenta');
+        }
+    };
+
+    // Handle company account deletion (GDPR Compliant)
+    const handleDeleteCompanyAccount = async (companyId, companyName) => {
+        try {
+            // Show GDPR confirmation dialog
+            Alert.alert(
+                '🗑️ Eliminar Empresa (GDPR)',
+                `¿Estás seguro de que quieres eliminar PERMANENTEMENTE la empresa "${companyName}"?\n\n⚠️ ADVERTENCIA GDPR:\n• Todos los datos empresariales serán borrados\n• Las credenciales de acceso serán eliminadas\n• Los pagos futuros serán cancelados\n• Esta acción NO se puede deshacer\n• Cumple con el derecho al olvido (GDPR)\n\n💳 IMPORTANTE: Se cancelarán automáticamente todos los pagos recurrentes y suscripciones activas.\n\nEsta es una eliminación completa y definitiva.`,
+                [
+                    {
+                        text: 'Cancelar',
+                        style: 'cancel'
+                    },
+                    {
+                        text: '🗑️ Eliminar Permanentemente',
+                        style: 'destructive',
+                        onPress: async () => {
+                            try {
+                                console.log(`🗑️ Iniciando eliminación GDPR para empresa: ${companyName}`);
+
+                                const result = await AdminService.deleteCompanyAccount(companyId);
+
+                                if (result.success) {
+                                    // Update Redux state - remove company from list
+                                    const updatedCompanies = companies.list.filter(c => c.id !== companyId);
+                                    dispatch(setCompanies(updatedCompanies));
+
+                                    // Show GDPR compliance confirmation
+                                    Alert.alert(
+                                        '✅ Eliminación GDPR Completada',
+                                        `La empresa "${companyName}" ha sido eliminada permanentemente.\n\n🔒 GDPR Compliance:\n• ✅ Datos empresariales borrados\n• ✅ Credenciales eliminadas\n• ✅ Suscripciones canceladas\n• ✅ Pagos futuros cancelados\n• ✅ Acceso revocado\n\nLa empresa ya no puede acceder a la aplicación y no se realizarán más cobros.`,
+                                        [{ text: 'Entendido', style: 'default' }]
+                                    );
+
+                                    // Reload data to update counts
+                                    loadAdminData();
+                                } else {
+                                    Alert.alert('❌ Error en Eliminación GDPR', result.message);
+                                }
+                            } catch (error) {
+                                console.error('Error en eliminación GDPR de empresa:', error);
+                                Alert.alert('❌ Error', 'No se pudo completar la eliminación GDPR de la empresa');
+                            }
+                        }
+                    }
+                ]
+            );
+        } catch (error) {
+            Alert.alert('❌ Error', 'No se pudo iniciar la eliminación de la empresa');
+        }
+    };
+
+
+
+
+
+    // Handle admin password change
+    // Handle admin password change with enhanced persistence
+
+    // 🧹 FUNCIÓN TEMPORAL DE DEBUG - REMOVER EN PRODUCCIÓN
+    const handleClearPasswordCache = async () => {
+        try {
+            Alert.alert(
+                '🧹 Limpiar Cache',
+                '¿Estás seguro de que quieres limpiar el cache de contraseñas? Esto reseteará el sistema.',
+                [
+                    { text: 'Cancelar', style: 'cancel' },
+                    {
+                        text: 'Limpiar',
+                        style: 'destructive',
+                        onPress: async () => {
+                            const result = await clearAdminPasswordCache();
+                            if (result) {
+                                Alert.alert('✅ Cache Limpiado', 'Reinicia la app para aplicar cambios.');
+                            } else {
+                                Alert.alert('❌ Error', 'No se pudo limpiar el cache.');
+                            }
+                        }
+                    }
+                ]
+            );
+        } catch (error) {
+            console.error('Error clearing cache:', error);
+        }
+    };
+
+    const handleAdminChangePassword = async () => {
+        try {
+            setIsChangingPassword(true);
+            console.log('🔐 [ADMIN] Iniciando cambio de contraseña...');
+
+            // Validaciones
+            if (!changePasswordForm.currentPassword || !changePasswordForm.newPassword || !changePasswordForm.confirmPassword) {
+                Alert.alert('Error', 'Por favor completa todos los campos');
+                setIsChangingPassword(false);
+                return;
+            }
+
+            if (changePasswordForm.newPassword !== changePasswordForm.confirmPassword) {
+                Alert.alert('Error', 'Las contraseñas nuevas no coinciden');
+                setIsChangingPassword(false);
+                return;
+            }
+
+            if (changePasswordForm.newPassword.length < 6) {
+                Alert.alert('Error', 'La nueva contraseña debe tener al menos 6 caracteres');
+                setIsChangingPassword(false);
+                return;
+            }
+
+            // Verificar contraseña actual usando el sistema mejorado
+            console.log('🔐 [ADMIN] Verificando contraseña actual...');
+            const currentStoredPassword = await StorageService.getAdminPassword();
+            console.log('🔐 [ADMIN] Contraseña almacenada:', currentStoredPassword);
+            console.log('🔐 [ADMIN] Contraseña introducida:', changePasswordForm.currentPassword);
+
+            if (currentStoredPassword !== changePasswordForm.currentPassword) {
+                console.log('❌ [ADMIN] Contraseña actual incorrecta');
+                Alert.alert('Error', 'La contraseña actual es incorrecta');
+                setIsChangingPassword(false);
+                return;
+            }
+
+            console.log('✅ [ADMIN] Contraseña actual verificada');
+
+            // Guardar nueva contraseña usando el sistema mejorado
+            console.log('🔐 [ADMIN] Guardando nueva contraseña...');
+            const saveResult = await StorageService.saveAdminPassword(changePasswordForm.newPassword);
+
+            if (!saveResult) {
+                console.error('❌ [ADMIN] Error al guardar la nueva contraseña');
+                Alert.alert('Error', 'No se pudo guardar la nueva contraseña. Inténtalo de nuevo.');
+                setIsChangingPassword(false);
+                return;
+            }
+
+            console.log('✅ [ADMIN] Nueva contraseña guardada exitosamente');
+
+            // Verificar que la nueva contraseña se guardó correctamente
+            console.log('🔐 [ADMIN] Verificando nueva contraseña...');
+            const verificationPassword = await StorageService.getAdminPassword();
+
+            if (verificationPassword !== changePasswordForm.newPassword) {
+                console.error('❌ [ADMIN] Error en verificación de nueva contraseña');
+                console.error('❌ [ADMIN] Esperada:', changePasswordForm.newPassword);
+                console.error('❌ [ADMIN] Obtenida:', verificationPassword);
+                Alert.alert('Error', 'Error en la verificación de la nueva contraseña. Inténtalo de nuevo.');
+                setIsChangingPassword(false);
+                return;
+            }
+
+            console.log('✅ [ADMIN] Nueva contraseña verificada correctamente');
+
+            // Actualizar usuario actual si es necesario
+            if (currentUser) {
+                const updatedUser = {
+                    ...currentUser,
+                    lastPasswordChange: new Date().toISOString()
+                };
+                await StorageService.saveUser(updatedUser);
+                console.log('✅ [ADMIN] Usuario actualizado');
+            }
+
+            // Limpiar formulario y cerrar modal
+            setChangePasswordForm({
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: ''
+            });
+            setShowPasswordModal(false);
+            setIsChangingPassword(false);
+
+            console.log('✅ [ADMIN] Cambio de contraseña completado exitosamente');
+
+            Alert.alert(
+                '✅ Contraseña Actualizada',
+                `Tu contraseña de administrador ha sido cambiada exitosamente.\n\n🔐 Nueva contraseña activa: ${changePasswordForm.newPassword}\n\n⚠️ IMPORTANTE: Esta es ahora la ÚNICA contraseña válida para iniciar sesión como administrador. Guárdala en un lugar seguro.`,
+                [{
+                    text: 'Entendido',
+                    onPress: () => {
+                        console.log('🔐 [ADMIN] Usuario confirmó el cambio de contraseña');
+                    }
+                }]
+            );
+
+        } catch (error) {
+            console.error('❌ [ADMIN] Error changing admin password:', error);
+            Alert.alert('Error', 'No se pudo cambiar la contraseña. Inténtalo de nuevo.');
+            setIsChangingPassword(false);
+        }
+    };;
+
+    // Handle view company details
+    const handleViewCompany = (company) => {
+        try {
+            console.log('📋 Navegando a detalles de empresa:', company.companyName);
+
+            // Usar navegación interna con estado
+            setSelectedCompanyId(company.id);
+            setSelectedCompanyName(company.companyName);
+            setCurrentView('companyDetail');
+        } catch (error) {
+            console.error('Error navigating to company details:', error);
+            Alert.alert('Error', 'No se pudo abrir los detalles de la empresa');
+        }
+    };
+
+    // Handle view company locations
+    const handleViewCompanyLocations = (company) => {
+        try {
+            console.log('📍 Navegando a locales de empresa:', company.companyName);
+
+            // Usar navegación interna con estado
+            setSelectedCompanyId(company.id);
+            setSelectedCompanyName(company.companyName);
+            setCurrentView('companyLocations');
+        } catch (error) {
+            console.error('Error navigating to company locations:', error);
+            Alert.alert('Error', 'No se pudo abrir los locales de la empresa');
+        }
+    };
+
+    // Handle back from company details
+    const handleBackFromCompanyDetail = () => {
+        setCurrentView('main');
+        setSelectedCompanyId(null);
+        setSelectedCompanyName('');
+    };
+
+    // Handle back from company locations
+    const handleBackFromCompanyLocations = () => {
+        setCurrentView('main');
+        setSelectedCompanyId(null);
+        setSelectedCompanyName('');
+    };
+
+    // Handle logout
+    const handleLogout = async () => {
+        try {
+            Alert.alert(
+                'Cerrar Sesión',
+                '¿Estás seguro de que quieres cerrar la sesión de administrador?',
+                [
+                    {
+                        text: 'Cancelar',
+                        style: 'cancel'
+                    },
+                    {
+                        text: 'Cerrar Sesión',
+                        style: 'destructive',
+                        onPress: async () => {
+                            try {
+                                // Clear user data
+                                await StorageService.clearUser();
+
+                                // Reset admin state
+                                dispatch({ type: 'auth/logoutUser/fulfilled' });
+
+                                // Show success message
+                                Alert.alert('Sesión Cerrada', 'Has cerrado la sesión correctamente');
+                            } catch (error) {
+                                console.error('Error during logout:', error);
+                                Alert.alert('Error', 'Hubo un problema al cerrar la sesión');
+                            }
+                        }
+                    }
+                ]
+            );
+        } catch (error) {
+            console.error('Error during logout:', error);
+            Alert.alert('Error', 'No se pudo cerrar la sesión');
+        }
+    };
+
+    // Cities management functions
+    const loadCitiesData = async () => {
+        try {
+            setIsLoadingCities(true);
+            console.log('🏙️ [AdminPanel] Cargando datos de ciudades...');
+
+            const citiesData = await CitiesService.getAllCities();
+            setCities(citiesData);
+
+            console.log('✅ [AdminPanel] Ciudades cargadas:', citiesData.length);
+        } catch (error) {
+            console.error('❌ [AdminPanel] Error cargando ciudades:', error);
+            Alert.alert('Error', 'No se pudieron cargar las ciudades');
+        } finally {
+            setIsLoadingCities(false);
+        }
+    };
+
+    const handleAddCity = () => {
+        setCityModalMode('add');
+        setSelectedCity(null);
+        setCityForm({ name: '' });
+        setShowCityModal(true);
+    };
+
+    const handleEditCity = (city) => {
+        setCityModalMode('edit');
+        setSelectedCity(city);
+        setCityForm({ name: city.name });
+        setShowCityModal(true);
+    };
+
+    const handleSaveCity = async () => {
+        try {
+            if (!cityForm.name.trim()) {
+                Alert.alert('Error', 'El nombre de la ciudad es requerido');
+                return;
+            }
+
+            let result;
+            if (cityModalMode === 'add') {
+                result = await CitiesService.addCity(cityForm.name.trim());
+            } else {
+                result = await CitiesService.updateCity(selectedCity.id, { name: cityForm.name.trim() });
+            }
+
+            if (result.success) {
+                console.log('✅ [AdminPanel] Ciudad guardada exitosamente, eventos emitidos automáticamente');
+                Alert.alert('Éxito', result.message);
+                setShowCityModal(false);
+                await loadCitiesData(); // Recargar datos
+            } else {
+                Alert.alert('Error', result.message);
+            }
+        } catch (error) {
+            console.error('❌ [AdminPanel] Error guardando ciudad:', error);
+            Alert.alert('Error', 'No se pudo guardar la ciudad');
+        }
+    };
+
+    const handleDeleteCity = async (city) => {
+        try {
+            Alert.alert(
+                'Eliminar Ciudad',
+                `¿Estás seguro de que quieres eliminar "${city.name}"?\n\nEsta acción no se puede deshacer y la ciudad desaparecerá del selector de influencers.`,
+                [
+                    { text: 'Cancelar', style: 'cancel' },
+                    {
+                        text: 'Eliminar',
+                        style: 'destructive',
+                        onPress: async () => {
+                            const result = await CitiesService.deleteCity(city.id);
+                            if (result.success) {
+                                console.log('✅ [AdminPanel] Ciudad eliminada exitosamente, eventos emitidos automáticamente');
+                                Alert.alert('Éxito', result.message);
+                                await loadCitiesData(); // Recargar datos
+                            } else {
+                                Alert.alert('Error', result.message);
+                            }
+                        }
+                    }
+                ]
+            );
+        } catch (error) {
+            console.error('❌ [AdminPanel] Error eliminando ciudad:', error);
+            Alert.alert('Error', 'No se pudo eliminar la ciudad');
+        }
+    };
+
+    const handleToggleCityStatus = async (city) => {
+        try {
+            const newStatus = !city.isActive;
+            const result = await CitiesService.toggleCityStatus(city.id, newStatus);
+
+            if (result.success) {
+                console.log('✅ [AdminPanel] Estado de ciudad cambiado exitosamente, eventos emitidos automáticamente');
+                await loadCitiesData(); // Recargar datos
+            } else {
+                Alert.alert('Error', result.message);
+            }
+        } catch (error) {
+            console.error('❌ [AdminPanel] Error cambiando estado de ciudad:', error);
+            Alert.alert('Error', 'No se pudo cambiar el estado de la ciudad');
+        }
+    };
+
+    // Render dashboard section with subsections
+    const renderDashboard = () => (
+        <ScrollView style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Dashboard</Text>
+
+            {/* Dashboard Subsection Selector */}
+            <View style={styles.dashboardSelector}>
+                <TouchableOpacity
+                    style={[
+                        styles.dashboardSelectorButton,
+                        dashboardSubsection === 'administrative' && styles.dashboardSelectorButtonActive
+                    ]}
+                    onPress={() => setDashboardSubsection('administrative')}
+                >
+                    <Text style={[
+                        styles.dashboardSelectorText,
+                        dashboardSubsection === 'administrative' && styles.dashboardSelectorTextActive
+                    ]}>
+                        Dashboard Administrativo
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[
+                        styles.dashboardSelectorButton,
+                        dashboardSubsection === 'financial' && styles.dashboardSelectorButtonActive
+                    ]}
+                    onPress={() => setDashboardSubsection('financial')}
+                >
+                    <Text style={[
+                        styles.dashboardSelectorText,
+                        dashboardSubsection === 'financial' && styles.dashboardSelectorTextActive
+                    ]}>
+                        Dashboard Financiero
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
+            {/* Render content based on selected subsection */}
+            {dashboardSubsection === 'administrative' ? renderAdministrativeDashboard() : renderFinancialDashboard()}
+        </ScrollView>
+    );
+
+    // Render administrative dashboard content
+    const renderAdministrativeDashboard = () => (
+        <View>
+            {/* Stats Cards */}
+            <View style={styles.statsGrid}>
+                <View style={styles.statCard}>
+                    <Text style={styles.statNumber}>€{dashboard.totalRevenue.toLocaleString()}</Text>
+                    <Text style={styles.statLabel}>Ingresos Totales Previstos</Text>
+                </View>
+                <View style={styles.statCard}>
+                    <Text style={styles.statNumber}>€{dashboard.monthlyRevenue.toLocaleString()}</Text>
+                    <Text style={styles.statLabel}>Ingresos Mensuales</Text>
+                </View>
+                <View style={styles.statCard}>
+                    <Text style={styles.statNumber}>{dashboard.totalCompanies}</Text>
+                    <Text style={styles.statLabel}>Empresas Totales</Text>
+                </View>
+                <View style={styles.statCard}>
+                    <Text style={styles.statNumber}>{dashboard.activeCompanies}</Text>
+                    <Text style={styles.statLabel}>Empresas Activas</Text>
+                </View>
+                <View style={styles.statCard}>
+                    <Text style={styles.statNumber}>{dashboard.totalInfluencers}</Text>
+                    <Text style={styles.statLabel}>Influencers Totales</Text>
+                </View>
+                <View style={styles.statCard}>
+                    <Text style={styles.statNumber}>{dashboard.pendingInfluencers}</Text>
+                    <Text style={styles.statLabel}>Solicitudes Pendientes</Text>
+                </View>
+            </View>
+
+            {/* Recent Activity */}
+            <View style={styles.activitySection}>
+                <Text style={styles.subsectionTitle}>Actividad Reciente</Text>
+                {dashboard.recentActivity && dashboard.recentActivity.length > 0 ? (
+                    dashboard.recentActivity.map((activity, index) => (
+                        <View key={`activity_${activity.id || index}_${activity.timestamp || Date.now()}`} style={styles.activityItem}>
+                            <Text style={styles.activityText}>{activity.description}</Text>
+                            <Text style={styles.activityTime}>
+                                {new Date(activity.timestamp).toLocaleDateString()}
+                            </Text>
+                        </View>
+                    ))
+                ) : (
+                    <View style={styles.activityItem}>
+                        <Text style={styles.activityText}>No hay actividad reciente</Text>
+                        <Text style={styles.activityTime}>-</Text>
+                    </View>
+                )}
+            </View>
+        </View>
+    );
+
+    // Render financial dashboard content
+    const renderFinancialDashboard = () => (
+        <View>
+            {/* Financial Summary */}
+            <View style={styles.financialSummary}>
+                <View style={styles.revenueCard}>
+                    <Text style={styles.revenueAmount}>€{dashboard.totalRevenue.toLocaleString()}</Text>
+                    <Text style={styles.revenueLabel}>Ingresos Totales Previstos</Text>
+                </View>
+                <View style={styles.revenueCard}>
+                    <Text style={styles.revenueAmount}>€{dashboard.monthlyRevenue.toLocaleString()}</Text>
+                    <Text style={styles.revenueLabel}>Este Mes</Text>
+                </View>
+            </View>
+
+
+
+            {/* Recent Transactions */}
+            <View style={styles.transactionsSection}>
+                <Text style={styles.subsectionTitle}>Transacciones Recientes</Text>
+                {companies.list && companies.list.filter(c => isCompanyActive(c)).slice(0, 5).map((company, index) => {
+                    const planInfo = getCompanyDisplayPlan(company);
+                    // Usar AdminService para obtener el pago mensual correcto
+                    const adminPlanInfo = AdminService.getCompanyPlanInfo(company);
+                    const lastPayment = adminPlanInfo.monthlyPrice;
+
+                    return (
+                        <View key={`transaction_${company.id}_${index}`} style={styles.transactionItem}>
+                            <View>
+                                <Text style={styles.transactionCompany}>{company.companyName}</Text>
+                                <Text style={styles.transactionDate}>
+                                    {new Date(company.registrationDate).toLocaleDateString()}
+                                </Text>
+                                <Text style={styles.transactionDescription}>Pago mensual - {planInfo.name}</Text>
+                            </View>
+                            <Text style={styles.transactionAmount}>+€{lastPayment.toLocaleString()}</Text>
+                        </View>
+                    );
+                })}
+                {(!companies.list || companies.list.filter(c => isCompanyActive(c)).length === 0) && (
+                    <View style={styles.transactionItem}>
+                        <Text style={styles.transactionCompany}>No hay transacciones recientes</Text>
+                        <Text style={styles.transactionAmount}>€0</Text>
+                    </View>
+                )}
+            </View>
+
+            {/* Financial Metrics */}
+            <View style={styles.statsGrid}>
+                <View style={styles.statCard}>
+                    <Text style={styles.statNumber}>{companies.list ? companies.list.filter(c => isCompanyActive(c)).length : 0}</Text>
+                    <Text style={styles.statLabel}>Empresas Pagando</Text>
+                </View>
+                <View style={styles.statCard}>
+                    <Text style={styles.statNumber}>{dashboard.totalRevenue > 0 ? '+12%' : '0%'}</Text>
+                    <Text style={styles.statLabel}>Crecimiento</Text>
+                </View>
+            </View>
+        </View>
+    );
+
+    // Render companies section
+    const renderCompanies = () => (
+        <ScrollView style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Gestión de Empresas</Text>
+
+            <FlatList
+                data={companies.list}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                    <View style={styles.companyCard}>
+                        <View style={styles.companyHeader}>
+                            <Text style={styles.companyName}>{item.companyName}</Text>
+                            <View style={[styles.statusBadge,
+                            getCompanyStatus(item) === 'active' ? styles.statusActive : styles.statusPending
+                            ]}>
+                                <Text style={styles.statusText}>
+                                    {getCompanyStatusText(item)}
+                                </Text>
+                            </View>
+                        </View>
+                        <Text style={styles.companyInfo}>
+                            Plan: {getCompanyDisplayPlan(item).name}
+                        </Text>
+                        <Text style={styles.companyInfo}>
+                            Pago mensual: €{getCompanyDisplayPlan(item).price}
+                        </Text>
+                        <Text style={styles.companyInfo}>
+                            Duración: {getCompanyDisplayPlan(item).duration} meses
+                        </Text>
+                        <Text style={styles.companyInfo}>
+                            Total del plan: €{getCompanyDisplayPlan(item).totalPrice || (getCompanyDisplayPlan(item).price * getCompanyDisplayPlan(item).duration)}
+                        </Text>
+                        <Text style={styles.companyInfo}>Email: {item.companyEmail}</Text>
+                        <Text style={styles.companyInfo}>Teléfono: {item.companyPhone}</Text>
+                        <Text style={styles.companyInfo}>
+                            Registrado: {item.firstPaymentCompletedDate ?
+                                new Date(item.firstPaymentCompletedDate).toLocaleDateString() :
+                                new Date(item.registrationDate).toLocaleDateString()}
+                        </Text>
+                        {item.nextBillingDate && (
+                            <Text style={styles.companyInfo}>
+                                Próximo pago: {new Date(item.nextBillingDate).toLocaleDateString()}
+                            </Text>
+                        )}
+
+                        {/* Botones de Acción */}
+                        <View style={styles.companyActions}>
+                            <TouchableOpacity
+                                style={styles.viewCompanyButton}
+                                onPress={() => handleViewCompany(item)}
+                            >
+                                <Text style={styles.viewCompanyButtonText}>Ver Empresa</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.viewLocationsButton}
+                                onPress={() => handleViewCompanyLocations(item)}
+                            >
+                                <Text style={styles.viewLocationsButtonText}>Ver Locales</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.deleteCompanyButton}
+                                onPress={() => handleDeleteCompanyAccount(item.id, item.companyName)}
+                            >
+                                <Text style={styles.deleteCompanyButtonText}>Eliminar GDPR</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                )}
+                scrollEnabled={false}
+            />
+        </ScrollView>
+    );
+
+    // Render influencers section
+    const renderInfluencers = () => (
+        <ScrollView style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Gestión de Influencers</Text>
+
+            {/* Influencer Section Selector */}
+            <View style={styles.dashboardSelector}>
+                <TouchableOpacity
+                    style={[
+                        styles.dashboardSelectorButton,
+                        influencerSection === 'pending' && styles.dashboardSelectorButtonActive
+                    ]}
+                    onPress={() => setInfluencerSection('pending')}
+                >
+                    <Text style={[
+                        styles.dashboardSelectorText,
+                        influencerSection === 'pending' && styles.dashboardSelectorTextActive
+                    ]}>
+                        Solicitudes Pendientes ({influencers.pendingRequests.length})
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[
+                        styles.dashboardSelectorButton,
+                        influencerSection === 'approved' && styles.dashboardSelectorButtonActive
+                    ]}
+                    onPress={() => setInfluencerSection('approved')}
+                >
+                    <Text style={[
+                        styles.dashboardSelectorText,
+                        influencerSection === 'approved' && styles.dashboardSelectorTextActive
+                    ]}>
+                        Influencers Aprobados ({influencers.approvedInfluencers.length})
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
+            {/* Render content based on selected section */}
+            {influencerSection === 'pending' ? renderPendingInfluencers() : renderApprovedInfluencers()}
+        </ScrollView>
+    );
+
+    // Render pending influencers
+    const renderPendingInfluencers = () => (
+        <>
+            {influencers.pendingRequests.length > 0 ? (
+                <FlatList
+                    data={influencers.pendingRequests}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <View style={styles.influencerCard}>
+                            <View style={styles.influencerHeader}>
+                                <Text style={styles.influencerName}>{item.fullName}</Text>
+                                <Text style={styles.influencerUsername}>
+                                    {item.instagramUsername?.startsWith('@') ? item.instagramUsername : `@${item.instagramUsername}`}
+                                </Text>
+                            </View>
+                            <Text style={styles.influencerInfo}>Seguidores IG: {item.instagramFollowers}</Text>
+                            <Text style={styles.influencerInfo}>Ciudad: {item.city}</Text>
+                            <Text style={styles.influencerInfo}>Email: {item.email}</Text>
+                            <Text style={styles.influencerInfo}>Teléfono: {item.phone}</Text>
+
+                            {/* Botón para ver capturas de Instagram */}
+                            <TouchableOpacity
+                                style={styles.screenshotsButton}
+                                onPress={() => {
+                                    setSelectedInfluencerForScreenshots(item);
+                                    setShowScreenshots(true);
+                                }}
+                            >
+                                <MinimalistIcons name="image" size={16} color={'#C9A961'} isActive={false} />
+                                <Text style={styles.screenshotsButtonText}>Ver Capturas de Instagram</Text>
+                                <View style={styles.screenshotsBadge}>
+                                    <Text style={styles.screenshotsBadgeText}>
+                                        {item.instagramScreenshots ? item.instagramScreenshots.length : 3}
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+
+                            <View style={styles.actionButtons}>
+                                <TouchableOpacity
+                                    style={[styles.actionButton, styles.approveButton]}
+                                    onPress={() => handleApproveInfluencer(item.id)}
+                                >
+                                    <Text style={styles.actionButtonText}>Aprobar</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.actionButton, styles.rejectButton]}
+                                    onPress={() => setSelectedInfluencer(item)}
+                                >
+                                    <Text style={styles.actionButtonText}>Rechazar</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
+                    scrollEnabled={false}
+                />
+            ) : (
+                <View style={styles.emptyState}>
+                    <Text style={styles.emptyStateText}>No hay solicitudes pendientes</Text>
+                </View>
+            )}
+        </>
+    );
+
+    // Render approved influencers
+    const renderApprovedInfluencers = () => (
+        <>
+            {influencers.approvedInfluencers.length > 0 ? (
+                <FlatList
+                    data={influencers.approvedInfluencers}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <View style={styles.influencerCard}>
+                            <View style={styles.influencerHeader}>
+                                <Text style={styles.influencerName}>{item.fullName}</Text>
+                                <Text style={styles.influencerUsername}>
+                                    {item.instagramUsername?.startsWith('@') ? item.instagramUsername : `@${item.instagramUsername}`}
+                                </Text>
+                                <View style={[styles.statusBadge, styles.statusActive]}>
+                                    <Text style={styles.statusText}>Aprobado</Text>
+                                </View>
+                            </View>
+                            <Text style={styles.influencerInfo}>Seguidores IG: {item.instagramFollowers}</Text>
+                            <Text style={styles.influencerInfo}>Ciudad: {item.city}</Text>
+                            <Text style={styles.influencerInfo}>Email: {item.email}</Text>
+                            <Text style={styles.influencerInfo}>Teléfono: {item.phone}</Text>
+                            <Text style={styles.influencerInfo}>
+                                Aprobado: {new Date(item.approvedAt).toLocaleDateString()}
+                            </Text>
+                            {item.lastLogin && (
+                                <Text style={styles.influencerInfo}>
+                                    Último acceso: {new Date(item.lastLogin).toLocaleDateString()}
+                                </Text>
+                            )}
+
+                            {/* Estado de acceso */}
+                            <View style={styles.accessStatus}>
+                                <Text style={[styles.accessStatusText, item.hasAccess ? styles.accessActive : styles.accessInactive]}>
+                                    {item.hasAccess ? '✅ Tiene acceso a la app' : '❌ Sin acceso a la app'}
+                                </Text>
+                            </View>
+
+                            {/* Botón para eliminar cuenta (GDPR) */}
+                            <TouchableOpacity
+                                style={styles.deleteAccountButton}
+                                onPress={() => setSelectedInfluencerForDeletion(item)}
+                            >
+                                <MinimalistIcons name="delete" size={16} color={'#F44336'} isActive={false} />
+                                <Text style={styles.deleteAccountButtonText}>🗑️ Borrar Cuenta (GDPR)</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    scrollEnabled={false}
+                />
+            ) : (
+                <View style={styles.emptyState}>
+                    <Text style={styles.emptyStateText}>No hay influencers aprobados</Text>
+                </View>
+            )}
+        </>
+    );
+
+    // Render campaigns section
+    const renderCampaigns = () => (
+        <ScrollView style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Gestión de Campañas</Text>
+
+            {/* Create Campaign Form */}
+            <View style={styles.createCampaignSection}>
+                <Text style={styles.subsectionTitle}>Crear Nueva Campaña</Text>
+
+                <TextInput
+                    style={styles.input}
+                    placeholder="Título de la campaña"
+                    placeholderTextColor="#666"
+                    value={newCampaign.title}
+                    onChangeText={(text) => setNewCampaign({ ...newCampaign, title: text })}
+                />
+
+                <TextInput
+                    style={styles.input}
+                    placeholder="Nombre del negocio"
+                    placeholderTextColor="#666"
+                    value={newCampaign.business}
+                    onChangeText={(text) => setNewCampaign({ ...newCampaign, business: text })}
+                />
+
+                <TextInput
+                    style={styles.input}
+                    placeholder="Instagram de la empresa (ej: @miempresa)"
+                    placeholderTextColor="#666"
+                    value={newCampaign.companyInstagram}
+                    onChangeText={(text) => setNewCampaign({ ...newCampaign, companyInstagram: text })}
+                />
+
+                <TextInput
+                    style={[styles.input, styles.textArea]}
+                    placeholder="Descripción de la campaña"
+                    placeholderTextColor="#666"
+                    multiline
+                    numberOfLines={4}
+                    value={newCampaign.description}
+                    onChangeText={(text) => setNewCampaign({ ...newCampaign, description: text })}
+                />
+
+                <TextInput
+                    style={styles.input}
+                    placeholder="Requisitos (ej: Min. 10K seguidores)"
+                    placeholderTextColor="#666"
+                    value={newCampaign.requirements}
+                    onChangeText={(text) => setNewCampaign({ ...newCampaign, requirements: text })}
+                />
+
+                <TouchableOpacity style={styles.createButton} onPress={handleCreateCampaign}>
+                    <Text style={styles.createButtonText}>Crear Campaña</Text>
+                </TouchableOpacity>
+            </View>
+
+            {/* Existing Campaigns */}
+            <Text style={styles.subsectionTitle}>Campañas Existentes</Text>
+            <FlatList
+                data={campaigns.list}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                    <View style={styles.campaignCard}>
+                        <View style={styles.campaignHeader}>
+                            <Text style={styles.campaignTitle}>{item.title}</Text>
+                            <View style={[styles.statusBadge, styles.statusActive]}>
+                                <Text style={styles.statusText}>{item.status}</Text>
+                            </View>
+                        </View>
+                        <Text style={styles.campaignInfo}>Negocio: {item.business}</Text>
+                        <Text style={styles.campaignInfo}>Categoría: {item.category}</Text>
+                        <Text style={styles.campaignInfo}>Ciudad: {item.city}</Text>
+
+                        <View style={styles.campaignActions}>
+                            <TouchableOpacity
+                                style={[styles.actionButton, styles.editButton]}
+                                onPress={() => Alert.alert('Editar', 'Función de edición en desarrollo')}
+                            >
+                                <Text style={styles.actionButtonText}>Editar</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.actionButton, styles.deleteButton]}
+                                onPress={() => {
+                                    Alert.alert(
+                                        'Confirmar',
+                                        '¿Estás seguro de que quieres eliminar esta campaña?',
+                                        [
+                                            { text: 'Cancelar', style: 'cancel' },
+                                            { text: 'Eliminar', onPress: () => dispatch(deleteCampaign(item.id)) }
+                                        ]
+                                    );
+                                }}
+                            >
+                                <Text style={styles.actionButtonText}>Eliminar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                )}
+                scrollEnabled={false}
+            />
+        </ScrollView>
+    );
+
+
+
+
+
+    // Render security section
+    const renderSecurity = () => (
+        <ScrollView style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Seguridad del Administrador</Text>
+
+            {/* Password and Security Section */}
+            <View style={styles.securitySection}>
+                <Text style={styles.securitySectionTitle}>Gestión de Contraseña</Text>
+                <Text style={styles.securitySectionDescription}>
+                    Mantén tu cuenta de administrador segura actualizando tu contraseña regularmente.
+                </Text>
+
+                <TouchableOpacity
+                    style={styles.securityButton}
+                    onPress={() => setShowPasswordModal(true)}
+                >
+                    <View style={styles.securityButtonContent}>
+                        <View style={styles.securityButtonIcon}>
+                            <MinimalistIcons name="settings" size={24} color="#C9A961" />
+                        </View>
+                        <View style={styles.securityButtonTextContainer}>
+                            <Text style={styles.securityButtonTitle}>Contraseña y Seguridad</Text>
+                            <Text style={styles.securityButtonSubtitle}>Cambiar contraseña de administrador</Text>
+                        </View>
+                        <Text style={styles.securityButtonArrow}>›</Text>
+                    </View>
+                </TouchableOpacity>
+
+                {currentUser?.lastPasswordChange && (
+                    <Text style={styles.lastPasswordChange}>
+                        Última actualización: {new Date(currentUser.lastPasswordChange).toLocaleDateString()}
+                    </Text>
+                )}
+            </View>
+
+            {/* Security Tips Section */}
+            <View style={styles.securitySection}>
+                <Text style={styles.securitySectionTitle}>Consejos de Seguridad</Text>
+                <View style={styles.securityTip}>
+                    <View style={styles.securityTipIcon}>
+                        <MinimalistIcons name="admin" size={20} color="#C9A961" />
+                    </View>
+                    <Text style={styles.securityTipText}>Usa una contraseña fuerte con al menos 8 caracteres</Text>
+                </View>
+                <View style={styles.securityTip}>
+                    <View style={styles.securityTipIcon}>
+                        <MinimalistIcons name="settings" size={20} color="#C9A961" />
+                    </View>
+                    <Text style={styles.securityTipText}>Cambia tu contraseña cada 3-6 meses</Text>
+                </View>
+                <View style={styles.securityTip}>
+                    <View style={styles.securityTipIcon}>
+                        <MinimalistIcons name="close" size={20} color="#FF6B6B" />
+                    </View>
+                    <Text style={styles.securityTipText}>No compartas tus credenciales de administrador</Text>
+                </View>
+            </View>
+        </ScrollView>
+    );
+
+    // Render cities section
+    const renderCities = () => (
+        <ScrollView style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Gestión de Ciudades</Text>
+
+            <View style={styles.citiesSection}>
+                <Text style={styles.subsectionTitle}>Ciudades Disponibles</Text>
+                <Text style={styles.sectionDescription}>
+                    Administra las ciudades que aparecen en el selector de influencers. Los cambios se aplican inmediatamente.
+                </Text>
+
+                {isLoadingCities ? (
+                    <View style={styles.loadingContainer}>
+                        <Text style={styles.loadingText}>Cargando ciudades...</Text>
+                    </View>
+                ) : (
+                    <>
+                        {cities.map((city) => (
+                            <View key={city.id} style={styles.cityItem}>
+                                <View style={styles.cityInfo}>
+                                    <Text style={styles.cityName}>{city.name}</Text>
+                                    <Text style={[
+                                        styles.cityStatus,
+                                        { color: city.isActive ? '#4CAF50' : '#FF6B6B' }
+                                    ]}>
+                                        {city.isActive ? 'Activa' : 'Inactiva'}
+                                    </Text>
+                                </View>
+                                <View style={styles.cityActions}>
+                                    <Switch
+                                        value={city.isActive}
+                                        onValueChange={() => handleToggleCityStatus(city)}
+                                        trackColor={{ false: '#767577', true: '#C9A961' }}
+                                        thumbColor={city.isActive ? '#fff' : '#f4f3f4'}
+                                    />
+                                    <TouchableOpacity
+                                        style={styles.editButton}
+                                        onPress={() => handleEditCity(city)}
+                                    >
+                                        <MinimalistIcons name="settings" size={16} color="#C9A961" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={styles.deleteButton}
+                                        onPress={() => handleDeleteCity(city)}
+                                    >
+                                        <MinimalistIcons name="close" size={16} color="#FF6B6B" />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        ))}
+
+                        {cities.length === 0 && (
+                            <View style={styles.emptyCitiesContainer}>
+                                <Text style={styles.emptyCitiesText}>No hay ciudades configuradas</Text>
+                            </View>
+                        )}
+                    </>
+                )}
+
+                <TouchableOpacity style={styles.addButton} onPress={handleAddCity}>
+                    <Text style={styles.addButtonText}>+ Añadir Nueva Ciudad</Text>
+                </TouchableOpacity>
+
+                <View style={styles.citiesStats}>
+                    <Text style={styles.statsText}>
+                        Total: {cities.length} | Activas: {cities.filter(c => c.isActive).length} | Inactivas: {cities.filter(c => !c.isActive).length}
+                    </Text>
+                </View>
+            </View>
+        </ScrollView>
+    );
+
+    // Render categories section
+    const renderCategories = () => {
+        return (
+            <AdminCategoriesManager
+                onBack={() => dispatch(setCurrentSection('dashboard'))}
+            />
+        );
+    };
+
+    // Navigation menu
+    const navigationItems = [
+        { id: 'dashboard', title: 'Dashboard', icon: <MinimalistIcons name="chart" size={20} /> },
+        { id: 'companies', title: 'Empresas', icon: <MinimalistIcons name="business" size={20} /> },
+        { id: 'influencers', title: 'Influencer', icon: <MinimalistIcons name="users" size={20} /> },
+        { id: 'campaigns', title: 'Campañas', icon: <MinimalistIcons name="campaign" size={20} /> },
+        { id: 'requests', title: 'Solicitudes', icon: <MinimalistIcons name="events" size={20} /> },
+        { id: 'security', title: 'Seguridad', icon: <MinimalistIcons name="admin" size={20} /> },
+        { id: 'cities', title: 'Ciudades', icon: <MinimalistIcons name="location" size={20} /> },
+        { id: 'categories', title: 'Categorías', icon: <MinimalistIcons name="category" size={20} /> }
+    ];
+
+    const renderContent = () => {
+        // Show AdminCampaignManager when campaigns section is selected
+        if (ui.currentSection === 'campaigns') {
+            return (
+                <AdminCampaignManager
+                    onBack={() => dispatch(setCurrentSection('dashboard'))}
+                />
+            );
+        }
+
+        // Show AdminRequestsManager when requests section is selected
+        if (ui.currentSection === 'requests') {
+            return <AdminRequestsManager />;
+        }
+
+        switch (ui.currentSection) {
+            case 'dashboard': return renderDashboard();
+            case 'companies': return renderCompanies();
+            case 'influencers': return renderInfluencers();
+            case 'security': return renderSecurity();
+            case 'cities': return renderCities();
+            case 'categories': return renderCategories();
+            default: return renderDashboard();
+        }
+    };
+
+    // Render company detail screen if selected
+    if (currentView === 'companyDetail' && selectedCompanyId) {
+        return (
+            <AdminCompanyDetailScreen
+                route={{
+                    params: {
+                        companyId: selectedCompanyId
+                    }
+                }}
+                navigation={{
+                    goBack: handleBackFromCompanyDetail
+                }}
+            />
+        );
+    }
+
+    // Render company locations screen if selected
+    if (currentView === 'companyLocations' && selectedCompanyId) {
+        return (
+            <AdminCompanyLocationsScreen
+                companyId={selectedCompanyId}
+                companyName={selectedCompanyName}
+                onBack={handleBackFromCompanyLocations}
+            />
+        );
+    }
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <LinearGradient colors={['#000000', '#1a1a1a']} style={styles.gradient}>
+                {/* Header */}
+                <View style={styles.header}>
+                    <View style={styles.headerLeft}>
+                        <Text style={styles.headerTitle}>Panel de Administrador</Text>
+                        <Text style={styles.headerSubtitle}>Bienvenido, {currentUser?.fullName}</Text>
+                    </View>
+                    <TouchableOpacity
+                        style={styles.logoutButton}
+                        onPress={handleLogout}
+                    >
+                        <Text style={styles.logoutText}>Cerrar Sesión</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {/* Navigation */}
+                <View style={styles.navigationContainer}>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.navigation}
+                        style={styles.navigationScrollView}
+                    >
+                        {navigationItems.map((item) => (
+                            <TouchableOpacity
+                                key={item.id}
+                                style={[
+                                    styles.navItem,
+                                    ui.currentSection === item.id && styles.navItemActive
+                                ]}
+                                onPress={() => dispatch(setCurrentSection(item.id))}
+                            >
+                                <Text style={styles.navIcon}>{item.icon}</Text>
+                                <Text style={[
+                                    styles.navText,
+                                    ui.currentSection === item.id && styles.navTextActive
+                                ]}>
+                                    {item.title}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                </View>
+
+                {/* Content */}
+                <View style={styles.content}>
+                    {renderContent()}
+                </View>
+
+                {/* Modals */}
+
+                {/* Admin Password Change Modal */}
+                <Modal
+                    visible={showPasswordModal}
+                    transparent={true}
+                    animationType="slide"
+                    onRequestClose={() => setShowPasswordModal(false)}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.passwordModalContent}>
+                            <View style={styles.passwordModalHeader}>
+                                <Text style={styles.passwordModalTitle}>Contraseña y Seguridad</Text>
+                                <TouchableOpacity
+                                    style={styles.passwordModalClose}
+                                    onPress={() => setShowPasswordModal(false)}
+                                >
+                                    <Text style={styles.passwordModalCloseText}>✕</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.passwordModalIconContainer}>
+                                <LinearGradient
+                                    colors={['#C9A961', '#D4AF37']}
+                                    style={styles.passwordModalIconGradient}
+                                >
+                                    <View style={styles.passwordModalIcon}>
+                                        <MinimalistIcons name="settings" size={32} color="#FFFFFF" />
+                                    </View>
+                                </LinearGradient>
+                                <Text style={styles.passwordModalSubtitle}>
+                                    Cambia tu contraseña de administrador para mantener la seguridad
+                                </Text>
+                            </View>
+
+                            <ScrollView style={styles.passwordModalForm}>
+                                <View style={styles.passwordInputGroup}>
+                                    <Text style={styles.passwordInputLabel}>Contraseña Actual</Text>
+                                    <TextInput
+                                        style={styles.passwordTextInput}
+                                        value={changePasswordForm.currentPassword}
+                                        onChangeText={(text) => setChangePasswordForm({
+                                            ...changePasswordForm,
+                                            currentPassword: text
+                                        })}
+                                        placeholder="Ingresa tu contraseña actual"
+                                        placeholderTextColor="#666"
+                                        secureTextEntry
+                                        autoCapitalize="none"
+                                    />
+                                </View>
+
+                                <View style={styles.passwordInputGroup}>
+                                    <Text style={styles.passwordInputLabel}>Nueva Contraseña</Text>
+                                    <TextInput
+                                        style={styles.passwordTextInput}
+                                        value={changePasswordForm.newPassword}
+                                        onChangeText={(text) => setChangePasswordForm({
+                                            ...changePasswordForm,
+                                            newPassword: text
+                                        })}
+                                        placeholder="Ingresa tu nueva contraseña"
+                                        placeholderTextColor="#666"
+                                        secureTextEntry
+                                        autoCapitalize="none"
+                                    />
+                                    <Text style={styles.passwordHint}>
+                                        La contraseña debe tener al menos 6 caracteres
+                                    </Text>
+                                </View>
+
+                                <View style={styles.passwordInputGroup}>
+                                    <Text style={styles.passwordInputLabel}>Confirmar Nueva Contraseña</Text>
+                                    <TextInput
+                                        style={styles.passwordTextInput}
+                                        value={changePasswordForm.confirmPassword}
+                                        onChangeText={(text) => setChangePasswordForm({
+                                            ...changePasswordForm,
+                                            confirmPassword: text
+                                        })}
+                                        placeholder="Confirma tu nueva contraseña"
+                                        placeholderTextColor="#666"
+                                        secureTextEntry
+                                        autoCapitalize="none"
+                                    />
+                                </View>
+
+                                <View style={styles.passwordModalActions}>
+                                    <TouchableOpacity
+                                        style={[styles.passwordChangeButton, isChangingPassword && styles.passwordChangeButtonDisabled]}
+                                        onPress={handleAdminChangePassword}
+                                        disabled={isChangingPassword}
+                                    >
+                                        <Text style={styles.passwordChangeButtonText}>
+                                            {isChangingPassword ? 'Cambiando...' : 'Cambiar Contraseña'}
+                                        </Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        style={styles.passwordCancelButton}
+                                        onPress={() => {
+                                            setChangePasswordForm({
+                                                currentPassword: '',
+                                                newPassword: '',
+                                                confirmPassword: ''
+                                            });
+                                            setShowPasswordModal(false);
+                                        }}
+                                    >
+                                        <Text style={styles.passwordCancelButtonText}>Cancelar</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </ScrollView>
+                        </View>
+                    </View>
+                </Modal>
+
+                {/* Influencer Rejection Modal */}
+                <Modal
+                    visible={selectedInfluencer !== null}
+                    transparent
+                    animationType="slide"
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>Rechazar Influencer</Text>
+                            <Text style={styles.modalSubtitle}>
+                                ¿Por qué rechazas a {selectedInfluencer?.fullName}?
+                            </Text>
+
+                            <TextInput
+                                style={[styles.modalInput, styles.textArea]}
+                                placeholder="Motivo del rechazo..."
+                                placeholderTextColor="#666"
+                                multiline
+                                numberOfLines={4}
+                                value={rejectionReason}
+                                onChangeText={setRejectionReason}
+                            />
+
+                            <View style={styles.modalButtons}>
+                                <TouchableOpacity
+                                    style={[styles.modalButton, styles.cancelButton]}
+                                    onPress={() => {
+                                        setSelectedInfluencer(null);
+                                        setRejectionReason('');
+                                    }}
+                                >
+                                    <Text style={styles.modalButtonText}>Cancelar</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modalButton, styles.rejectButton]}
+                                    onPress={() => handleRejectInfluencer(selectedInfluencer.id, rejectionReason)}
+                                >
+                                    <Text style={styles.modalButtonText}>Rechazar</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                {/* Modal de confirmación GDPR para eliminar cuenta de influencer */}
+                <Modal
+                    visible={selectedInfluencerForDeletion !== null}
+                    transparent
+                    animationType="slide"
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>🗑️ Eliminar Cuenta (GDPR)</Text>
+                            <Text style={styles.modalSubtitle}>
+                                ¿Eliminar PERMANENTEMENTE la cuenta de {selectedInfluencerForDeletion?.fullName}?
+                            </Text>
+                            <Text style={styles.modalWarning}>
+                                ⚠️ ADVERTENCIA GDPR - ELIMINACIÓN COMPLETA:
+                            </Text>
+                            <Text style={styles.gdprWarningText}>
+                                • Todos los datos personales serán borrados{'\n'}
+                                • Las credenciales de acceso serán eliminadas{'\n'}
+                                • Todas las referencias serán limpiadas{'\n'}
+                                • Esta acción NO se puede deshacer{'\n'}
+                                • Cumple con el derecho al olvido (GDPR)
+                            </Text>
+                            <Text style={styles.gdprComplianceText}>
+                                🔒 Esta es una eliminación completa y definitiva conforme al GDPR.
+                            </Text>
+
+                            <View style={styles.modalButtons}>
+                                <TouchableOpacity
+                                    style={[styles.modalButton, styles.cancelButton]}
+                                    onPress={() => setSelectedInfluencerForDeletion(null)}
+                                >
+                                    <Text style={styles.modalButtonText}>Cancelar</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modalButton, styles.gdprDeleteButton]}
+                                    onPress={() => handleDeleteInfluencerAccount(selectedInfluencerForDeletion.id, selectedInfluencerForDeletion.fullName)}
+                                >
+                                    <Text style={styles.modalButtonText}>🗑️ Eliminar Permanentemente</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                {/* Modal de capturas de Instagram */}
+                <AdminInfluencerScreenshots
+                    visible={showScreenshots}
+                    onClose={() => {
+                        setShowScreenshots(false);
+                        setSelectedInfluencerForScreenshots(null);
+                    }}
+                    screenshots={selectedInfluencerForScreenshots?.instagramScreenshots || []}
+                    influencerName={selectedInfluencerForScreenshots?.fullName || ''}
+                    influencerUsername={selectedInfluencerForScreenshots?.instagramUsername || ''}
+                />
+
+                {/* City Management Modal */}
+                <Modal
+                    visible={showCityModal}
+                    transparent={true}
+                    animationType="slide"
+                    onRequestClose={() => setShowCityModal(false)}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.cityModalContent}>
+                            <View style={styles.cityModalHeader}>
+                                <Text style={styles.cityModalTitle}>
+                                    {cityModalMode === 'add' ? 'Añadir Nueva Ciudad' : 'Editar Ciudad'}
+                                </Text>
+                                <TouchableOpacity
+                                    style={styles.cityModalClose}
+                                    onPress={() => setShowCityModal(false)}
+                                >
+                                    <MinimalistIcons name="close" size={24} color="#888" />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.cityModalBody}>
+                                <Text style={styles.cityModalDescription}>
+                                    {cityModalMode === 'add'
+                                        ? 'La nueva ciudad aparecerá inmediatamente en el selector de influencers.'
+                                        : 'Los cambios se aplicarán inmediatamente en el selector de influencers.'
+                                    }
+                                </Text>
+
+                                <View style={styles.cityInputGroup}>
+                                    <Text style={styles.cityInputLabel}>Nombre de la Ciudad</Text>
+                                    <TextInput
+                                        style={styles.cityTextInput}
+                                        value={cityForm.name}
+                                        onChangeText={(text) => setCityForm({ name: text })}
+                                        placeholder="Ej: Madrid, Barcelona, Valencia..."
+                                        placeholderTextColor="#666"
+                                        autoCapitalize="words"
+                                    />
+                                </View>
+
+                                <View style={styles.cityModalActions}>
+                                    <TouchableOpacity
+                                        style={styles.cityCancelButton}
+                                        onPress={() => setShowCityModal(false)}
+                                    >
+                                        <Text style={styles.cityCancelButtonText}>Cancelar</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        style={styles.citySaveButton}
+                                        onPress={handleSaveCity}
+                                    >
+                                        <Text style={styles.citySaveButtonText}>
+                                            {cityModalMode === 'add' ? 'Añadir Ciudad' : 'Guardar Cambios'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+            </LinearGradient>
+        </SafeAreaView>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#000000'
+    },
+    gradient: {
+        flex: 1
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#333'
+    },
+    headerLeft: {
+        flex: 1
+    },
+    headerTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#C9A961',
+        marginBottom: 2
+    },
+    headerSubtitle: {
+        fontSize: 12,
+        color: '#fff',
+        opacity: 0.8
+    },
+    logoutButton: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderRadius: 8,
+        backgroundColor: '#333',
+        borderWidth: 1,
+        borderColor: '#C9A961'
+    },
+    logoutText: {
+        color: '#C9A961',
+        fontSize: 12,
+        fontWeight: '600'
+    },
+    navigationContainer: {
+        borderBottomWidth: 1,
+        borderBottomColor: '#333',
+        maxHeight: 90,
+    },
+    navigationScrollView: {
+        flexGrow: 0,
+    },
+    navigation: {
+        flexDirection: 'row',
+        paddingVertical: 12,
+        paddingHorizontal: 4,
+    },
+    navItem: {
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        marginHorizontal: 2,
+        borderRadius: 8,
+        backgroundColor: '#1a1a1a',
+        minWidth: 80,
+    },
+    navItemActive: {
+        backgroundColor: '#C9A961'
+    },
+    navIcon: {
+        fontSize: 18,
+        marginBottom: 4
+    },
+    navText: {
+        color: '#fff',
+        fontSize: 11,
+        fontWeight: '600',
+        textAlign: 'center',
+        lineHeight: 13
+    },
+    navTextActive: {
+        color: '#000'
+    },
+    content: {
+        flex: 1
+    },
+    sectionContainer: {
+        flex: 1,
+        padding: 16
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#C9A961',
+        marginBottom: 16
+    },
+    dashboardSelector: {
+        flexDirection: 'row',
+        backgroundColor: '#1a1a1a',
+        borderRadius: 10,
+        padding: 4,
+        marginBottom: 20,
+        alignSelf: 'center',
+        maxWidth: 400
+    },
+    dashboardSelectorButton: {
+        flex: 1,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        alignItems: 'center'
+    },
+    dashboardSelectorButtonActive: {
+        backgroundColor: '#C9A961'
+    },
+    dashboardSelectorText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '600'
+    },
+    dashboardSelectorTextActive: {
+        color: '#000'
+    },
+    subsectionTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#fff',
+        marginBottom: 15,
+        marginTop: 10
+    },
+    statsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        marginBottom: 24
+    },
+    statCard: {
+        width: '48%',
+        backgroundColor: '#1a1a1a',
+        padding: 16,
+        borderRadius: 10,
+        marginBottom: 12,
+        alignItems: 'center'
+    },
+    statNumber: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#C9A961',
+        marginBottom: 4
+    },
+    statLabel: {
+        fontSize: 12,
+        color: '#fff',
+        textAlign: 'center'
+    },
+    activitySection: {
+        backgroundColor: '#1a1a1a',
+        padding: 16,
+        borderRadius: 10
+    },
+    activityItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#333'
+    },
+    activityText: {
+        color: '#fff',
+        flex: 1
+    },
+    activityTime: {
+        color: '#666',
+        fontSize: 12
+    },
+    companyCard: {
+        backgroundColor: '#1a1a1a',
+        padding: 12,
+        borderRadius: 10,
+        marginBottom: 12
+    },
+    companyHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10
+    },
+    companyName: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#C9A961',
+        flex: 1
+    },
+    companyInfo: {
+        color: '#fff',
+        marginBottom: 5
+    },
+    viewCompanyButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#C9A961',
+        paddingVertical: 8,
+        paddingHorizontal: 8,
+        borderRadius: 6,
+        flex: 1,
+    },
+    viewCompanyButtonText: {
+        color: '#000000',
+        fontSize: 13,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+    viewLocationsButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#4A90E2',
+        paddingVertical: 8,
+        paddingHorizontal: 8,
+        borderRadius: 6,
+        flex: 1,
+    },
+    viewLocationsButtonText: {
+        color: '#FFFFFF',
+        fontSize: 13,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+    companyActions: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 10,
+        gap: 8,
+    },
+    deleteCompanyButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#FF4444',
+        paddingVertical: 8,
+        paddingHorizontal: 8,
+        borderRadius: 6,
+        flex: 1,
+    },
+    deleteCompanyButtonText: {
+        color: '#FFFFFF',
+        fontSize: 13,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
+    statusBadge: {
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 15
+    },
+    statusActive: {
+        backgroundColor: '#4CAF50'
+    },
+    statusPending: {
+        backgroundColor: '#FF9800'
+    },
+    statusText: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 'bold'
+    },
+    influencerCard: {
+        backgroundColor: '#1a1a1a',
+        padding: 12,
+        borderRadius: 10,
+        marginBottom: 12
+    },
+    influencerHeader: {
+        marginBottom: 10
+    },
+    influencerName: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#C9A961'
+    },
+    influencerUsername: {
+        fontSize: 16,
+        color: '#fff',
+        opacity: 0.8
+    },
+    influencerInfo: {
+        color: '#fff',
+        marginBottom: 5
+    },
+    screenshotsButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(201, 169, 97, 0.1)',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        marginTop: 12,
+        marginBottom: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(201, 169, 97, 0.3)',
+    },
+    screenshotsButtonText: {
+        color: '#C9A961',
+        fontSize: 14,
+        fontWeight: '600',
+        marginLeft: 8,
+        flex: 1,
+        fontFamily: 'Inter',
+    },
+    screenshotsBadge: {
+        backgroundColor: '#C9A961',
+        borderRadius: 12,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        minWidth: 24,
+        alignItems: 'center',
+    },
+    screenshotsBadgeText: {
+        color: '#000000',
+        fontSize: 12,
+        fontWeight: 'bold',
+        fontFamily: 'Inter',
+    },
+    actionButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 15
+    },
+    actionButton: {
+        flex: 1,
+        paddingVertical: 10,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginHorizontal: 5
+    },
+    approveButton: {
+        backgroundColor: '#4CAF50'
+    },
+    rejectButton: {
+        backgroundColor: '#F44336'
+    },
+    editButton: {
+        backgroundColor: '#2196F3'
+    },
+    deleteButton: {
+        backgroundColor: '#F44336'
+    },
+    actionButtonText: {
+        color: '#fff',
+        fontWeight: 'bold'
+    },
+    createCampaignSection: {
+        backgroundColor: '#1a1a1a',
+        padding: 16,
+        borderRadius: 10,
+        marginBottom: 16
+    },
+    input: {
+        backgroundColor: '#333',
+        color: '#fff',
+        padding: 15,
+        borderRadius: 8,
+        marginBottom: 15,
+        fontSize: 16
+    },
+    textArea: {
+        height: 100,
+        textAlignVertical: 'top'
+    },
+    createButton: {
+        backgroundColor: '#C9A961',
+        paddingVertical: 15,
+        borderRadius: 8,
+        alignItems: 'center'
+    },
+    createButtonText: {
+        color: '#000',
+        fontSize: 16,
+        fontWeight: 'bold'
+    },
+    campaignCard: {
+        backgroundColor: '#1a1a1a',
+        padding: 12,
+        borderRadius: 10,
+        marginBottom: 12
+    },
+    campaignHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 10
+    },
+    campaignTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#C9A961',
+        flex: 1
+    },
+    campaignInfo: {
+        color: '#fff',
+        marginBottom: 5
+    },
+    campaignActions: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 15
+    },
+    financialSummary: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 30
+    },
+    revenueCard: {
+        flex: 1,
+        backgroundColor: '#1a1a1a',
+        padding: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+        marginHorizontal: 5
+    },
+    revenueAmount: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#C9A961',
+        marginBottom: 5
+    },
+    revenueLabel: {
+        fontSize: 16,
+        color: '#fff',
+        textAlign: 'center'
+    },
+    paymentMethodsSection: {
+        backgroundColor: '#1a1a1a',
+        padding: 16,
+        borderRadius: 10,
+        marginBottom: 16
+    },
+    paymentMethod: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#333'
+    },
+    paymentMethodName: {
+        color: '#fff',
+        fontSize: 16
+    },
+    paymentMethodAmount: {
+        color: '#C9A961',
+        fontSize: 16,
+        fontWeight: 'bold'
+    },
+    transactionsSection: {
+        backgroundColor: '#1a1a1a',
+        padding: 16,
+        borderRadius: 10
+    },
+    transactionItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#333'
+    },
+    transactionCompany: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '500'
+    },
+    transactionDate: {
+        color: '#666',
+        fontSize: 14
+    },
+    transactionAmount: {
+        color: '#4CAF50',
+        fontSize: 16,
+        fontWeight: 'bold'
+    },
+
+
+
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    modalContent: {
+        backgroundColor: '#1a1a1a',
+        padding: 20,
+        borderRadius: 15,
+        width: width * 0.9,
+        maxWidth: 400
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#C9A961',
+        marginBottom: 10,
+        textAlign: 'center'
+    },
+    modalSubtitle: {
+        fontSize: 16,
+        color: '#fff',
+        marginBottom: 20,
+        textAlign: 'center'
+    },
+    modalInput: {
+        backgroundColor: '#333',
+        color: '#fff',
+        padding: 15,
+        borderRadius: 8,
+        marginBottom: 15,
+        fontSize: 16
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 20
+    },
+    modalButton: {
+        flex: 1,
+        paddingVertical: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginHorizontal: 5
+    },
+    cancelButton: {
+        backgroundColor: '#666'
+    },
+    confirmButton: {
+        backgroundColor: '#C9A961'
+    },
+    modalButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold'
+    },
+    loadingText: {
+        color: '#fff',
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 50
+    },
+    transactionDescription: {
+        color: '#666',
+        fontSize: 12,
+        marginTop: 2
+    },
+    emptyState: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 40,
+        backgroundColor: '#1a1a1a',
+        borderRadius: 10,
+        marginTop: 20
+    },
+    emptyStateText: {
+        color: '#666',
+        fontSize: 16,
+        textAlign: 'center'
+    },
+    accessStatus: {
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+        marginTop: 10,
+        marginBottom: 10
+    },
+    accessStatusText: {
+        fontSize: 14,
+        fontWeight: '600'
+    },
+    accessActive: {
+        color: '#4CAF50'
+    },
+    accessInactive: {
+        color: '#F44336'
+    },
+    deleteAccountButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(244, 67, 54, 0.1)',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        marginTop: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(244, 67, 54, 0.3)',
+        justifyContent: 'center'
+    },
+    deleteAccountButtonText: {
+        color: '#F44336',
+        fontSize: 14,
+        fontWeight: '600',
+        marginLeft: 8
+    },
+    modalWarning: {
+        fontSize: 14,
+        color: '#FF9800',
+        marginBottom: 20,
+        textAlign: 'center',
+        lineHeight: 20,
+        backgroundColor: 'rgba(255, 152, 0, 0.1)',
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 152, 0, 0.3)'
+    },
+    gdprWarningText: {
+        fontSize: 13,
+        color: '#F44336',
+        marginBottom: 15,
+        lineHeight: 18,
+        backgroundColor: 'rgba(244, 67, 54, 0.1)',
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(244, 67, 54, 0.3)'
+    },
+    gdprComplianceText: {
+        fontSize: 12,
+        color: '#4CAF50',
+        marginBottom: 20,
+        textAlign: 'center',
+        fontWeight: '600',
+        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+        padding: 10,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: 'rgba(76, 175, 80, 0.3)'
+    },
+    gdprDeleteButton: {
+        backgroundColor: '#F44336',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        marginLeft: 10,
+        minWidth: 120,
+        alignItems: 'center'
+    },
+
+    // Security Section Styles
+    securitySection: {
+        backgroundColor: '#1a1a1a',
+        padding: 20,
+        borderRadius: 12,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: '#333'
+    },
+    securitySectionTitle: {
+        color: '#C9A961',
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 8
+    },
+    securitySectionDescription: {
+        color: '#ccc',
+        fontSize: 14,
+        marginBottom: 20,
+        lineHeight: 20
+    },
+    securityButton: {
+        backgroundColor: '#2a2a2a',
+        borderRadius: 10,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: '#444',
+        marginBottom: 12
+    },
+    securityButtonContent: {
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    securityButtonIcon: {
+        marginRight: 16,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    securityButtonTextContainer: {
+        flex: 1
+    },
+    securityButtonTitle: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+        marginBottom: 4
+    },
+    securityButtonSubtitle: {
+        color: '#888',
+        fontSize: 14
+    },
+    securityButtonArrow: {
+        color: '#C9A961',
+        fontSize: 20,
+        fontWeight: 'bold'
+    },
+    lastPasswordChange: {
+        color: '#666',
+        fontSize: 12,
+        fontStyle: 'italic',
+        textAlign: 'center',
+        marginTop: 8
+    },
+    securityTip: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+        paddingVertical: 8
+    },
+    securityTipIcon: {
+        marginRight: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 30
+    },
+    securityTipText: {
+        color: '#ccc',
+        fontSize: 14,
+        flex: 1,
+        lineHeight: 18
+    },
+
+    // Password Modal Styles
+    passwordModalContent: {
+        backgroundColor: '#1a1a1a',
+        borderRadius: 15,
+        width: width * 0.9,
+        maxHeight: height * 0.8,
+        borderWidth: 1,
+        borderColor: '#333'
+    },
+    passwordModalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#333'
+    },
+    passwordModalTitle: {
+        color: '#C9A961',
+        fontSize: 20,
+        fontWeight: '600'
+    },
+    passwordModalClose: {
+        padding: 8
+    },
+    passwordModalCloseText: {
+        color: '#888',
+        fontSize: 18,
+        fontWeight: 'bold'
+    },
+    passwordModalIconContainer: {
+        alignItems: 'center',
+        paddingVertical: 20
+    },
+    passwordModalIconGradient: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 12
+    },
+    passwordModalIcon: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        flex: 1
+    },
+    passwordModalSubtitle: {
+        color: '#ccc',
+        fontSize: 14,
+        textAlign: 'center',
+        paddingHorizontal: 20,
+        lineHeight: 20
+    },
+    passwordModalForm: {
+        paddingHorizontal: 20,
+        paddingBottom: 20
+    },
+    passwordInputGroup: {
+        marginBottom: 20
+    },
+    passwordInputLabel: {
+        color: '#C9A961',
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 8
+    },
+    passwordTextInput: {
+        backgroundColor: '#2a2a2a',
+        borderWidth: 1,
+        borderColor: '#444',
+        borderRadius: 8,
+        padding: 12,
+        color: '#fff',
+        fontSize: 16
+    },
+    passwordHint: {
+        color: '#888',
+        fontSize: 12,
+        marginTop: 4,
+        fontStyle: 'italic'
+    },
+    passwordModalActions: {
+        marginTop: 20
+    },
+    passwordChangeButton: {
+        backgroundColor: '#C9A961',
+        paddingVertical: 14,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginBottom: 12
+    },
+    passwordChangeButtonDisabled: {
+        backgroundColor: '#666',
+        opacity: 0.6
+    },
+    passwordChangeButtonText: {
+        color: '#000',
+        fontSize: 16,
+        fontWeight: '600'
+    },
+    passwordCancelButton: {
+        backgroundColor: 'transparent',
+        paddingVertical: 14,
+        borderRadius: 8,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#666'
+    },
+    passwordCancelButtonText: {
+        color: '#888',
+        fontSize: 16,
+        fontWeight: '500'
+    },
+    // Cities section styles
+    citiesSection: {
+        backgroundColor: '#1a1a1a',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16
+    },
+    cityItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        backgroundColor: '#2a2a2a',
+        borderRadius: 8,
+        marginBottom: 8
+    },
+    cityName: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600'
+    },
+    cityStatus: {
+        color: '#4CAF50',
+        fontSize: 14,
+        fontWeight: '500'
+    },
+    // Categories section styles
+    categoriesSection: {
+        backgroundColor: '#1a1a1a',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16
+    },
+    categoryItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        backgroundColor: '#2a2a2a',
+        borderRadius: 8,
+        marginBottom: 8
+    },
+    categoryName: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600'
+    },
+    categoryCount: {
+        color: '#C9A961',
+        fontSize: 14,
+        fontWeight: '500'
+    },
+    // Common styles for new sections
+    sectionDescription: {
+        color: '#ccc',
+        fontSize: 14,
+        marginBottom: 16,
+        lineHeight: 20
+    },
+    addButton: {
+        backgroundColor: '#C9A961',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 16
+    },
+    addButtonText: {
+        color: '#000',
+        fontSize: 16,
+        fontWeight: '600'
+    },
+    // Cities management styles
+    loadingContainer: {
+        padding: 20,
+        alignItems: 'center'
+    },
+    loadingText: {
+        color: '#ccc',
+        fontSize: 16
+    },
+    cityInfo: {
+        flex: 1
+    },
+    cityActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10
+    },
+    editButton: {
+        padding: 8,
+        borderRadius: 6,
+        backgroundColor: '#2a2a2a'
+    },
+    deleteButton: {
+        padding: 8,
+        borderRadius: 6,
+        backgroundColor: '#2a2a2a'
+    },
+    emptyCitiesContainer: {
+        padding: 20,
+        alignItems: 'center'
+    },
+    emptyCitiesText: {
+        color: '#666',
+        fontSize: 16,
+        fontStyle: 'italic'
+    },
+    citiesStats: {
+        marginTop: 16,
+        padding: 12,
+        backgroundColor: '#2a2a2a',
+        borderRadius: 8
+    },
+    statsText: {
+        color: '#C9A961',
+        fontSize: 14,
+        textAlign: 'center',
+        fontWeight: '500'
+    },
+    // City modal styles
+    cityModalContent: {
+        backgroundColor: '#1a1a1a',
+        borderRadius: 15,
+        width: width * 0.9,
+        maxWidth: 400,
+        borderWidth: 1,
+        borderColor: '#333'
+    },
+    cityModalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#333'
+    },
+    cityModalTitle: {
+        color: '#C9A961',
+        fontSize: 18,
+        fontWeight: '600'
+    },
+    cityModalClose: {
+        padding: 8
+    },
+    cityModalBody: {
+        padding: 20
+    },
+    cityModalDescription: {
+        color: '#ccc',
+        fontSize: 14,
+        marginBottom: 20,
+        lineHeight: 20
+    },
+    cityInputGroup: {
+        marginBottom: 20
+    },
+    cityInputLabel: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+        marginBottom: 8
+    },
+    cityTextInput: {
+        backgroundColor: '#2a2a2a',
+        borderRadius: 8,
+        padding: 12,
+        color: '#fff',
+        fontSize: 16,
+        borderWidth: 1,
+        borderColor: '#333'
+    },
+    cityModalActions: {
+        flexDirection: 'row',
+        gap: 12
+    },
+    cityCancelButton: {
+        flex: 1,
+        backgroundColor: '#333',
+        borderRadius: 8,
+        padding: 12,
+        alignItems: 'center'
+    },
+    cityCancelButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600'
+    },
+    citySaveButton: {
+        flex: 1,
+        backgroundColor: '#C9A961',
+        borderRadius: 8,
+        padding: 12,
+        alignItems: 'center'
+    },
+    citySaveButtonText: {
+        color: '#000',
+        fontSize: 16,
+        fontWeight: '600'
+    }
+});
+
+export default AdminPanel;

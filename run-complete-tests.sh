@@ -149,7 +149,7 @@ components=(
     "components/NotificationManager.js"
     "components/ChatSystem.js"
     "components/InteractiveMap.js"
-    "components/CollaborationDetailScreen.js"
+    "components/CollaborationDetailScreenNew.js"
 )
 
 for component in "${components[@]}"; do

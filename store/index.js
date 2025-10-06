@@ -8,11 +8,12 @@ import authReducer from './slices/authSlice';
 import collaborationsReducer from './slices/collaborationsSlice';
 import notificationsReducer from './slices/notificationsSlice';
 import uiReducer from './slices/uiSlice';
+import adminReducer from './slices/adminSlice';
 
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['auth', 'notifications'], // Solo persistir auth y notifications
+  whitelist: ['auth', 'notifications', 'admin'], // Solo persistir auth, notifications y admin
 };
 
 const rootReducer = combineReducers({
@@ -20,6 +21,7 @@ const rootReducer = combineReducers({
   collaborations: collaborationsReducer,
   notifications: notificationsReducer,
   ui: uiReducer,
+  admin: adminReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -29,7 +31,13 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+        ignoredActions: [
+          'persist/PERSIST',
+          'persist/REHYDRATE',
+          'persist/PAUSE',
+          'persist/PURGE',
+          'persist/REGISTER'
+        ],
       },
     }),
 });

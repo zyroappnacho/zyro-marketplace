@@ -7,38 +7,106 @@ export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async ({ email, password, role }, { rejectWithValue }) => {
     try {
-      // Admin login
-      if (email === 'admin_zyro' && password === 'ZyroAdmin2024!') {
-        const adminUser = {
-          id: 'admin_001',
-          role: 'admin',
-          name: 'Administrador ZYRO',
-          email: 'admin@zyro.com',
-          verified: true
-        };
-        await StorageService.saveUser(adminUser);
-        return adminUser;
+      // Admin login with persistent password
+      // Admin login with enhanced persistent password
+      if (email === 'admin_zyro') {
+        console.log('🔐 [AUTH] Verificando credenciales de administrador...');
+        console.log('🔐 [AUTH] Email introducido:', email);
+        console.log('🔐 [AUTH] Contraseña introducida:', password);
+        
+        // Usar el sistema mejorado de StorageService
+        console.log('🔐 [AUTH] Obteniendo contraseña almacenada...');
+        const currentAdminPassword = await StorageService.getAdminPassword();
+        console.log('🔐 [AUTH] Contraseña almacenada:', currentAdminPassword);
+        
+        // Verificación estricta
+        const passwordsMatch = String(password) === String(currentAdminPassword);
+        console.log('🔐 [AUTH] ¿Contraseñas coinciden?:', passwordsMatch);
+        console.log('🔐 [AUTH] Longitud introducida:', password.length);
+        console.log('🔐 [AUTH] Longitud almacenada:', currentAdminPassword.length);
+        
+        if (passwordsMatch) {
+          console.log('✅ [AUTH] Credenciales de administrador válidas');
+          
+          const adminUser = {
+            id: 'admin_001',
+            role: 'admin',
+            name: 'Administrador ZYRO',
+            email: 'admin@zyro.com',
+            verified: true,
+            lastLogin: new Date().toISOString(),
+            passwordLastChanged: await StorageService.getData('admin_last_update')
+          };
+          
+          await StorageService.saveUser(adminUser);
+          console.log('✅ [AUTH] Sesión de administrador iniciada correctamente');
+          return adminUser;
+        } else {
+          console.log('❌ [AUTH] Contraseña de administrador incorrecta');
+          console.log('❌ [AUTH] Comparación detallada:');
+          const maxLength = Math.max(password.length, currentAdminPassword.length);
+          for (let i = 0; i < maxLength; i++) {
+            const charInput = password[i] || '(fin)';
+            const charStored = currentAdminPassword[i] || '(fin)';
+            const match = charInput === charStored;
+            console.log(`❌ [AUTH] Pos ${i}: "${charInput}" vs "${charStored}" ${match ? '✅' : '❌'}`);
+          }
+          return rejectWithValue('Credenciales de administrador incorrectas');
+        }
       }
 
-      // Regular login simulation
-      const mockUser = {
-        id: role === 'influencer' ? 'inf_001' : 'comp_001',
-        role,
-        name: role === 'influencer' ? 'Ana García' : 'Restaurante Elegance',
-        email,
-        verified: true,
-        ...(role === 'influencer' && { 
-          followers: 15000, 
-          instagram: '@ana_lifestyle' 
-        }),
-        ...(role === 'company' && { 
-          plan: '6months',
-          businessName: 'Restaurante Elegance'
-        })
-      };
-
-      await StorageService.saveUser(mockUser);
-      return mockUser;
+      // Check for approved influencers/companies
+      console.log(`🔐 Intentando login para: ${email}`);
+      const approvedUser = await StorageService.getApprovedUserByEmail(email);
+      
+      if (approvedUser) {
+        console.log(`✅ Usuario aprobado encontrado: ${approvedUser.name} (${approvedUser.role})`);
+        
+        if (approvedUser.password === password) {
+          console.log(`✅ Contraseña correcta para: ${email}`);
+          
+          // Update last login
+          await StorageService.updateUserLastLogin(approvedUser.id);
+          
+          // Prepare user data for session
+          const userData = {
+            id: approvedUser.id,
+            role: approvedUser.role,
+            name: approvedUser.name,
+            email: approvedUser.email,
+            verified: true,
+          // Include role-specific data
+          ...(approvedUser.role === 'influencer' && {
+            fullName: approvedUser.fullName,
+            phone: approvedUser.phone,
+            city: approvedUser.city,
+            instagramUsername: approvedUser.instagramUsername,
+            instagramFollowers: approvedUser.instagramFollowers,
+            tiktokUsername: approvedUser.tiktokUsername,
+            tiktokFollowers: approvedUser.tiktokFollowers,
+            profileImage: approvedUser.profileImage,
+            followers: parseInt(approvedUser.instagramFollowers) || 0,
+            instagram: approvedUser.instagramUsername?.startsWith('@') 
+              ? approvedUser.instagramUsername 
+              : `@${approvedUser.instagramUsername}`
+          }),
+          ...(approvedUser.role === 'company' && {
+            businessName: approvedUser.businessName || approvedUser.name,
+            plan: approvedUser.plan || '6months'
+          })
+        };
+        
+          await StorageService.saveUser(userData);
+          console.log(`✅ Login exitoso: ${approvedUser.name} (${approvedUser.role})`);
+          return userData;
+        } else {
+          console.log(`❌ Contraseña incorrecta para: ${email}`);
+          return rejectWithValue('Credenciales incorrectas o usuario no aprobado');
+        }
+      } else {
+        console.log(`❌ Usuario no aprobado o no encontrado: ${email}`);
+        return rejectWithValue('Credenciales incorrectas o usuario no aprobado');
+      }
     } catch (error) {
       return rejectWithValue(error.message);
     }

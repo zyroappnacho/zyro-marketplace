@@ -1,0 +1,36 @@
+{
+  "setup_fee": {
+    "price_id": "price_1SFCbuLC2jTd4mwaukZNPkQM",
+    "product_id": "prod_TBZlFNDCAuO0KV",
+    "amount": 15000,
+    "currency": "eur",
+    "description": "Pago único para configuración de anuncios y promoción inicial en Instagram"
+  },
+  "plan_3_months": {
+    "price_id": "price_1SFCbwLC2jTd4mwadg3keFuY",
+    "product_id": "prod_TBZlbl68fFtnyw",
+    "amount": 49900,
+    "currency": "eur",
+    "description": "Plan de suscripción de 3 meses para empresas - 499€/mes",
+    "interval": "month",
+    "duration_months": 3
+  },
+  "plan_6_months": {
+    "price_id": "price_1SFCbyLC2jTd4mwa7NgH8eg5",
+    "product_id": "prod_TBZltbUbG9FPl4",
+    "amount": 39900,
+    "currency": "eur",
+    "description": "Plan de suscripción de 6 meses para empresas - 399€/mes",
+    "interval": "month",
+    "duration_months": 6
+  },
+  "plan_12_months": {
+    "price_id": "price_1SFCc1LC2jTd4mwaFHszb2JA",
+    "product_id": "prod_TBZlAGYRY9ifP0",
+    "amount": 29900,
+    "currency": "eur",
+    "description": "Plan de suscripción de 12 meses para empresas - 299€/mes",
+    "interval": "month",
+    "duration_months": 12
+  }
+}

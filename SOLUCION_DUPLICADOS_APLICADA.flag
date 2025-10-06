@@ -1,0 +1,10 @@
+{
+  "aplicada": true,
+  "fecha": "2025-10-06T11:51:31.865Z",
+  "version": "1.0.0",
+  "componentes": [
+    "CompanyRegistrationService",
+    "CompanyRegistrationWithStripe",
+    "StorageService"
+  ]
+}

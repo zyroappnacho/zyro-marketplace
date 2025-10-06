@@ -197,7 +197,7 @@ ZyroMarketplace/
 
 ### Administrador
 - **Usuario**: admin_zyro
-- **Contraseña**: ZyroAdmin2024!
+- **Contraseña**: xarrec-2paqra-guftoN
 
 ### Usuarios Regulares
 - **Influencer**: cualquier email / cualquier contraseña

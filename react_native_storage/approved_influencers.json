@@ -1,0 +1,47 @@
+[
+  {
+    "id": "nayades_001",
+    "email": "nayades@gmail.com",
+    "fullName": "Nayades Influencer",
+    "instagramUsername": "@nayades",
+    "instagramFollowers": 1300000,
+    "tiktokUsername": "@nayades",
+    "tiktokFollowers": 800000,
+    "phone": "+34 600 000 001",
+    "city": "Madrid",
+    "role": "influencer",
+    "status": "approved",
+    "password": "nayades123",
+    "lastUpdated": "2025-09-26T12:32:03.261Z"
+  },
+  {
+    "id": "test_002",
+    "email": "test@influencer.com",
+    "fullName": "Test Influencer",
+    "instagramUsername": "@testinfluencer",
+    "instagramFollowers": 25000,
+    "tiktokUsername": "@testinfluencer",
+    "tiktokFollowers": 15000,
+    "phone": "+34 600 000 002",
+    "city": "Barcelona",
+    "role": "influencer",
+    "status": "approved",
+    "password": "test123",
+    "lastUpdated": "2025-09-26T12:32:03.272Z"
+  },
+  {
+    "id": "demo_003",
+    "email": "demo@influencer.com",
+    "fullName": "Demo Influencer",
+    "instagramUsername": "@demoinfluencer",
+    "instagramFollowers": 50000,
+    "tiktokUsername": "@demoinfluencer",
+    "tiktokFollowers": 30000,
+    "phone": "+34 600 000 003",
+    "city": "Valencia",
+    "role": "influencer",
+    "status": "approved",
+    "password": "demo123",
+    "lastUpdated": "2025-09-26T12:32:03.272Z"
+  }
+]

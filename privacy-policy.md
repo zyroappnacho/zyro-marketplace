@@ -1,163 +1,182 @@
 # Política de Privacidad - Zyro Marketplace
 
-**Última actualización: 28 de enero de 2025**
-
 ## 1. Introducción
 
-Zyro Marketplace S.L. ("nosotros", "nuestro" o "Zyro") se compromete a proteger la privacidad de los usuarios de nuestra aplicación móvil Zyro Marketplace (la "App"). Esta Política de Privacidad describe cómo recopilamos, utilizamos, almacenamos y protegemos su información personal cuando utiliza nuestros servicios.
+En Zyro Marketplace, nos comprometemos a proteger y respetar tu privacidad. Esta Política de Privacidad explica cómo recopilamos, utilizamos, almacenamos y protegemos tu información personal cuando utilizas nuestra aplicación móvil y servicios.
 
 ## 2. Información que Recopilamos
 
-### 2.1 Información que Usted Proporciona
-- **Datos de registro**: Nombre completo, dirección de correo electrónico, contraseña
-- **Información de perfil**: Foto de perfil, biografía, enlaces a redes sociales
+### 2.1 Información Personal
+- **Datos de registro**: Nombre completo, dirección de correo electrónico, número de teléfono
+- **Información de perfil**: Foto de perfil, biografía, ubicación, fecha de nacimiento
 - **Datos de redes sociales**: Nombres de usuario de Instagram y TikTok, número de seguidores
-- **Información empresarial**: Nombre de la empresa, CIF, dirección, información de contacto
-- **Datos de pago**: Información de tarjetas de crédito y métodos de pago (procesada por terceros seguros)
-- **Comunicaciones**: Mensajes enviados a través del chat integrado de la aplicación
+- **Información empresarial**: Para empresas, datos fiscales, información de contacto, detalles del negocio
 
-### 2.2 Información Recopilada Automáticamente
-- **Datos de uso**: Páginas visitadas, tiempo de uso, funciones utilizadas
-- **Información del dispositivo**: Tipo de dispositivo, sistema operativo, identificadores únicos
-- **Datos de ubicación**: Ubicación aproximada para mostrar colaboraciones relevantes (solo con su consentimiento)
-- **Datos técnicos**: Dirección IP, tipo de navegador, configuración de idioma
+### 2.2 Información de Uso
+- **Actividad en la aplicación**: Colaboraciones solicitadas, mensajes enviados, preferencias
+- **Datos técnicos**: Dirección IP, tipo de dispositivo, sistema operativo, versión de la aplicación
+- **Información de ubicación**: Ciudad seleccionada para filtrar colaboraciones
 
-### 2.3 Información de Terceros
-- **Redes sociales**: Estadísticas públicas de Instagram y TikTok para verificación
-- **Servicios de pago**: Información de transacciones de procesadores de pago seguros
+### 2.3 Contenido Generado
+- **Imágenes y videos**: Capturas de pantalla de redes sociales, contenido de colaboraciones
+- **Comunicaciones**: Mensajes en el chat integrado, solicitudes de colaboración
 
-## 3. Cómo Utilizamos su Información
+## 3. Cómo Utilizamos tu Información
 
-### 3.1 Propósitos Principales
-- Proporcionar y mantener nuestros servicios
-- Procesar registros y verificar identidades
-- Facilitar colaboraciones entre influencers y empresas
-- Procesar pagos y suscripciones
-- Comunicarnos con usted sobre su cuenta y servicios
+### 3.1 Prestación de Servicios
+- Facilitar conexiones entre influencers y empresas
+- Procesar solicitudes de colaboración
+- Gestionar pagos y suscripciones
+- Proporcionar soporte al cliente
 
-### 3.2 Propósitos Secundarios
-- Mejorar y personalizar la experiencia del usuario
-- Enviar notificaciones relevantes sobre colaboraciones
-- Realizar análisis y estudios de mercado
-- Prevenir fraudes y garantizar la seguridad
-- Cumplir con obligaciones legales
+### 3.2 Mejora de la Plataforma
+- Analizar el uso de la aplicación para mejorar funcionalidades
+- Personalizar la experiencia del usuario
+- Desarrollar nuevas características y servicios
 
-## 4. Base Legal para el Procesamiento (GDPR)
+### 3.3 Comunicación
+- Enviar notificaciones sobre el estado de colaboraciones
+- Informar sobre actualizaciones de la aplicación
+- Proporcionar información de marketing (con consentimiento)
 
-Procesamos su información personal basándonos en:
-- **Consentimiento**: Para ubicación, marketing y cookies no esenciales
-- **Ejecución de contrato**: Para proporcionar nuestros servicios
-- **Interés legítimo**: Para mejorar servicios, seguridad y prevención de fraudes
-- **Obligación legal**: Para cumplir con requisitos fiscales y regulatorios
+## 4. Base Legal para el Tratamiento
+
+Procesamos tu información personal basándonos en:
+
+### 4.1 Consentimiento
+- Registro voluntario en la plataforma
+- Aceptación de términos y condiciones
+- Consentimiento para comunicaciones de marketing
+
+### 4.2 Ejecución de Contrato
+- Prestación de servicios de marketplace
+- Gestión de colaboraciones y pagos
+- Cumplimiento de obligaciones contractuales
+
+### 4.3 Interés Legítimo
+- Mejora de la seguridad de la plataforma
+- Prevención de fraude y actividades ilegales
+- Análisis de uso para mejoras del servicio
 
 ## 5. Compartir Información
 
-### 5.1 No Vendemos sus Datos
-Nunca vendemos, alquilamos o comercializamos su información personal a terceros.
+### 5.1 Con Otros Usuarios
+- **Influencers**: Información de perfil visible para empresas
+- **Empresas**: Datos de contacto compartidos tras aprobación de colaboración
+- **Administrador**: Acceso completo para gestión de la plataforma
 
-### 5.2 Compartimos Información Limitada Con:
-- **Empresas e influencers**: Información de perfil necesaria para colaboraciones
-- **Proveedores de servicios**: Procesadores de pago, servicios de hosting, analytics
-- **Autoridades legales**: Cuando sea requerido por ley o para proteger derechos
-
-### 5.3 Transferencias Internacionales
-Sus datos pueden ser transferidos a servidores ubicados en la Unión Europea. Todas las transferencias cumplen con las regulaciones de protección de datos aplicables.
+### 5.2 Con Terceros
+- **Proveedores de servicios**: Procesamiento de pagos, almacenamiento en la nube
+- **Autoridades**: Cuando sea requerido por ley
+- **Nunca vendemos** tu información personal a terceros
 
 ## 6. Seguridad de los Datos
 
-### 6.1 Medidas de Seguridad
-- Encriptación de datos en tránsito y en reposo
-- Autenticación de dos factores disponible
-- Acceso restringido a datos personales
+### 6.1 Medidas Técnicas
+- Encriptación de datos sensibles en tránsito y reposo
+- Autenticación segura con tokens JWT
+- Copias de seguridad regulares y redundancia de datos
 - Monitoreo continuo de seguridad
-- Copias de seguridad regulares y seguras
 
-### 6.2 Retención de Datos
-- **Cuentas activas**: Mientras mantenga su cuenta
-- **Cuentas inactivas**: Hasta 3 años después del último acceso
-- **Datos de transacciones**: 7 años por requisitos fiscales
-- **Datos de marketing**: Hasta que retire su consentimiento
+### 6.2 Medidas Organizativas
+- Acceso limitado a datos personales por personal autorizado
+- Formación regular en protección de datos
+- Políticas internas de seguridad y privacidad
+- Auditorías de seguridad periódicas
 
-## 7. Sus Derechos (GDPR)
+## 7. Retención de Datos
 
-### 7.1 Derechos de Acceso y Control
-- **Acceso**: Solicitar una copia de sus datos personales
-- **Rectificación**: Corregir datos inexactos o incompletos
-- **Eliminación**: Solicitar la eliminación de sus datos ("derecho al olvido")
-- **Portabilidad**: Recibir sus datos en formato estructurado
-- **Restricción**: Limitar el procesamiento de sus datos
-- **Oposición**: Oponerse al procesamiento basado en interés legítimo
+### 7.1 Período de Conservación
+- **Cuentas activas**: Mientras mantengas tu cuenta
+- **Cuentas inactivas**: Hasta 2 años después del último acceso
+- **Datos de facturación**: 7 años por requisitos fiscales
+- **Comunicaciones**: 3 años para resolución de disputas
 
-### 7.2 Cómo Ejercer sus Derechos
-- A través de la configuración de la aplicación
-- Enviando un correo a: gdpr@zyromarketplace.com
-- Contactando a nuestro Delegado de Protección de Datos
+### 7.2 Eliminación de Datos
+- Eliminación automática tras períodos de retención
+- Eliminación inmediata cuando solicites borrar tu cuenta
+- Anonimización de datos para análisis estadísticos
 
-## 8. Cookies y Tecnologías Similares
+## 8. Tus Derechos (GDPR)
 
-### 8.1 Tipos de Cookies
-- **Esenciales**: Necesarias para el funcionamiento básico
-- **Funcionales**: Mejoran la experiencia del usuario
-- **Analytics**: Nos ayudan a entender el uso de la aplicación
-- **Marketing**: Para personalizar contenido (solo con consentimiento)
+### 8.1 Derecho de Acceso
+- Solicitar una copia de todos tus datos personales
+- Información sobre cómo procesamos tus datos
+- Detalles sobre con quién compartimos tu información
 
-### 8.2 Control de Cookies
-Puede gestionar las preferencias de cookies en la configuración de la aplicación.
+### 8.2 Derecho de Rectificación
+- Corregir datos personales inexactos o incompletos
+- Actualizar información desactualizada
+- Modificar preferencias de comunicación
 
-## 9. Menores de Edad
+### 8.3 Derecho de Supresión ("Derecho al Olvido")
+- Solicitar la eliminación de tus datos personales
+- Eliminación automática al borrar tu cuenta
+- Excepciones por requisitos legales o contractuales
 
-Nuestra aplicación está dirigida a usuarios mayores de 18 años. No recopilamos intencionalmente información de menores de 13 años. Si descubrimos que hemos recopilado información de un menor, la eliminaremos inmediatamente.
+### 8.4 Derecho de Portabilidad
+- Recibir tus datos en formato estructurado y legible
+- Transferir datos a otro servicio cuando sea técnicamente posible
+- Exportación de datos de perfil y actividad
 
-## 10. Cambios en la Política
+### 8.5 Derecho de Oposición
+- Oponerte al procesamiento de tus datos para marketing
+- Limitar el uso de datos para ciertos propósitos
+- Retirar consentimiento en cualquier momento
 
-### 10.1 Notificación de Cambios
-Le notificaremos sobre cambios significativos en esta política a través de:
-- Notificación en la aplicación
-- Correo electrónico a su dirección registrada
-- Aviso en nuestro sitio web
+## 9. Cookies y Tecnologías Similares
 
-### 10.2 Cambios Menores
-Los cambios menores se publicarán en esta página con la fecha de actualización.
+### 9.1 Uso de Cookies
+- **Cookies esenciales**: Para el funcionamiento básico de la aplicación
+- **Cookies de rendimiento**: Para analizar el uso y mejorar la experiencia
+- **Cookies de personalización**: Para recordar preferencias del usuario
 
-## 11. Contacto y Quejas
+### 9.2 Control de Cookies
+- Puedes gestionar cookies desde la configuración de tu dispositivo
+- Algunas funcionalidades pueden verse limitadas sin cookies esenciales
 
-### 11.1 Información de Contacto
-**Zyro Marketplace S.L.**
-- **Dirección**: Calle Serrano 123, 28006 Madrid, España
-- **Email**: privacy@zyromarketplace.com
-- **Teléfono**: +34 900 123 456
-- **DPO**: gdpr@zyromarketplace.com
+## 10. Transferencias Internacionales
 
-### 11.2 Autoridad de Control
-Si no está satisfecho con nuestra respuesta, puede presentar una queja ante:
-**Agencia Española de Protección de Datos (AEPD)**
+### 10.1 Ubicación de Datos
+- Datos almacenados principalmente en servidores de la Unión Europea
+- Algunos proveedores de servicios pueden estar fuera de la UE
+- Garantías adecuadas mediante cláusulas contractuales estándar
+
+## 11. Menores de Edad
+
+### 11.1 Restricciones de Edad
+- Zyro está destinado a usuarios mayores de 16 años
+- No recopilamos intencionalmente datos de menores de 16 años
+- Si detectamos datos de menores, los eliminaremos inmediatamente
+
+## 12. Cambios en la Política
+
+### 12.1 Actualizaciones
+- Podemos actualizar esta política periódicamente
+- Te notificaremos sobre cambios significativos
+- La versión actualizada estará disponible en la aplicación
+- El uso continuado implica aceptación de cambios
+
+## 13. Contacto y Consultas
+
+### 13.1 Autoridad de Control
+- Puedes presentar una reclamación ante la Agencia Española de Protección de Datos (AEPD)
 - **Web**: www.aepd.es
 - **Teléfono**: 901 100 099
 
-## 12. Disposiciones Específicas por Jurisdicción
+## 14. Disposiciones Finales
 
-### 12.1 España (LOPDGDD)
-Cumplimos con la Ley Orgánica de Protección de Datos y Garantía de los Derechos Digitales.
+### 14.1 Legislación Aplicable
+- Esta política se rige por la legislación española
+- Cumplimiento con el Reglamento General de Protección de Datos (GDPR)
+- Jurisdicción de los tribunales españoles
 
-### 12.2 California (CCPA)
-Los residentes de California tienen derechos adicionales bajo la Ley de Privacidad del Consumidor de California.
-
-### 12.3 Reino Unido (UK GDPR)
-Cumplimos con las regulaciones de protección de datos del Reino Unido post-Brexit.
-
-## 13. Definiciones
-
-- **Datos personales**: Cualquier información relacionada con una persona física identificada o identificable
-- **Procesamiento**: Cualquier operación realizada sobre datos personales
-- **Controlador**: La entidad que determina los propósitos y medios del procesamiento
-- **Procesador**: La entidad que procesa datos personales en nombre del controlador
-
-## 14. Validez y Aplicabilidad
-
-Esta Política de Privacidad es válida desde la fecha de última actualización y se aplica a todos los usuarios de Zyro Marketplace, independientemente de su ubicación geográfica.
+### 14.2 Validez
+- Esta política es válida desde la fecha de última actualización
+- Prevalece sobre versiones anteriores
+- Forma parte integral de nuestros términos de servicio
 
 ---
 
-**Para cualquier pregunta sobre esta Política de Privacidad, contáctenos en privacy@zyromarketplace.com**
-
-*Esta política ha sido redactada para cumplir con GDPR, LOPDGDD, CCPA y otras regulaciones internacionales de privacidad.*
+**Última actualización:** 22 de septiembre de 2025
+**Versión:** 1.0

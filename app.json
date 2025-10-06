@@ -4,10 +4,10 @@
     "slug": "zyro-marketplace",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logozyrotransparente.PNG",
+    "icon": "./assets/logozyrotransparente.png",
     "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/logozyrotransparente.PNG",
+      "image": "./assets/logozyrotransparente.png",
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
@@ -17,7 +17,9 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.zyro.marketplace",
-      "buildNumber": "1",
+      "buildNumber": "2",
+      "deploymentTarget": "13.0",
+      "requireFullScreen": false,
       "infoPlist": {
         "UIBackgroundModes": [
           "background-fetch",
@@ -26,15 +28,20 @@
         "NSCameraUsageDescription": "Esta app necesita acceso a la cámara para subir fotos de contenido de colaboraciones.",
         "NSPhotoLibraryUsageDescription": "Esta app necesita acceso a la galería para seleccionar fotos de contenido de colaboraciones.",
         "NSLocationWhenInUseUsageDescription": "Esta app necesita acceso a la ubicación para mostrar colaboraciones cercanas en el mapa.",
-        "NSUserNotificationUsageDescription": "Esta app envía notificaciones sobre nuevas colaboraciones y actualizaciones importantes."
+        "NSUserNotificationUsageDescription": "Esta app envía notificaciones sobre nuevas colaboraciones y actualizaciones importantes.",
+        "UILaunchStoryboardName": "SplashScreen",
+        "UIStatusBarStyle": "UIStatusBarStyleLightContent",
+        "UIViewControllerBasedStatusBarAppearance": false,
+        "ITSAppUsesNonExemptEncryption": false
       },
       "config": {
         "usesNonExemptEncryption": false
-      }
+      },
+      "simulator": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logozyrotransparente.PNG",
+        "foregroundImage": "./assets/logozyrotransparente.png",
         "backgroundColor": "#000000"
       },
       "package": "com.zyro.marketplace",
@@ -51,7 +58,7 @@
       ]
     },
     "web": {
-      "favicon": "./assets/logozyrotransparente.PNG",
+      "favicon": "./assets/logozyrotransparente.png",
       "bundler": "metro"
     },
     "plugins": [
@@ -75,7 +82,7 @@
       ]
     ],
     "notification": {
-      "icon": "./assets/logozyrotransparente.PNG",
+      "icon": "./assets/logozyrotransparente.png",
       "color": "#C9A961",
       "androidMode": "default",
       "androidCollapsedTitle": "ZYRO Marketplace"

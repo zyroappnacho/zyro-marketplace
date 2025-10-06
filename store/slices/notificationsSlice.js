@@ -46,7 +46,7 @@ const initialState = {
       type: 'collaboration_approved',
       title: '¡Colaboración Aprobada!',
       message: 'Tu solicitud para "Degustación Premium" ha sido aprobada.',
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+      timestamp: Date.now() - 2 * 60 * 60 * 1000,
       read: false,
       icon: '🎉'
     },
@@ -55,7 +55,7 @@ const initialState = {
       type: 'new_collaboration',
       title: 'Nueva Colaboración Disponible',
       message: 'Hay una nueva colaboración en tu ciudad que podría interesarte.',
-      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
+      timestamp: Date.now() - 24 * 60 * 60 * 1000,
       read: false,
       icon: '📝'
     },
@@ -64,7 +64,7 @@ const initialState = {
       type: 'content_reminder',
       title: 'Recordatorio de Contenido',
       message: 'Recuerda publicar el contenido de tu colaboración antes del plazo.',
-      timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000,
       read: true,
       icon: '⏰'
     }

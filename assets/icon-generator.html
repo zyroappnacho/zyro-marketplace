@@ -4,183 +4,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZYRO Icon Generator</title>
+    <title>ZYRO Premium Icon Generator</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background: #000;
-            color: #fff;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #000000, #1a1a1a, #2d2d2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 40px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
         
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .header h1 {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #E8D5B7, #F4E4BC, #D4AF37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+            letter-spacing: 2px;
+        }
+        
+        .header p {
+            font-size: 18px;
+            color: #9CA3AF;
+            font-weight: 500;
+        }
+        
         .icon-container {
             width: 512px;
             height: 512px;
-            background: linear-gradient(135deg, #C9A961, #D4AF37, #B8860B);
+            background: linear-gradient(135deg, #1F2937, #374151, #4B5563);
             border-radius: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 20px;
+            margin: 30px;
             position: relative;
-            box-shadow: 0 20px 40px rgba(201, 169, 97, 0.3);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 0 0 1px rgba(232, 213, 183, 0.2);
+            overflow: hidden;
+        }
+        
+        .icon-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(232, 213, 183, 0.1) 0%, 
+                transparent 50%, 
+                rgba(244, 228, 188, 0.05) 100%);
+            border-radius: 120px;
         }
         
         .logo-text {
-            font-size: 180px;
+            font-size: 160px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #E8D5B7, #F4E4BC, #D4AF37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 12px;
+            font-family: 'SF Pro Display', sans-serif;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .premium-symbol {
+            position: absolute;
+            right: 60px;
+            top: 60px;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #E8D5B7, #F4E4BC);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            z-index: 3;
+        }
+        
+        .premium-symbol::before {
+            content: '✦';
+            font-size: 36px;
+            color: #1F2937;
             font-weight: 700;
-            color: #000;
-            letter-spacing: 8px;
-            font-family: 'Times New Roman', serif;
-        }
-        
-        .atom-symbol {
-            position: absolute;
-            right: 80px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 120px;
-            height: 120px;
-        }
-        
-        .atom-core {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #000;
-            position: absolute;
-            top: 50px;
-            left: 50px;
-        }
-        
-        .atom-orbit {
-            position: absolute;
-            border: 3px solid #000;
-            border-radius: 50%;
-        }
-        
-        .orbit-1 {
-            width: 120px;
-            height: 120px;
-            top: 0;
-            left: 0;
-        }
-        
-        .orbit-2 {
-            width: 90px;
-            height: 90px;
-            top: 15px;
-            left: 15px;
-            transform: rotate(45deg);
-        }
-        
-        .orbit-3 {
-            width: 60px;
-            height: 60px;
-            top: 30px;
-            left: 30px;
-            transform: rotate(90deg);
         }
         
         .instructions {
-            max-width: 600px;
+            max-width: 800px;
             text-align: center;
-            margin: 20px;
-            padding: 20px;
-            background: #111;
-            border-radius: 12px;
-            border: 1px solid #333;
+            margin: 40px 0;
+            padding: 32px;
+            background: linear-gradient(135deg, rgba(31, 41, 55, 0.8), rgba(55, 65, 81, 0.6));
+            border-radius: 24px;
+            border: 1px solid rgba(232, 213, 183, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .instructions h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #E8D5B7;
+            margin-bottom: 16px;
+        }
+        
+        .instructions p {
+            font-size: 16px;
+            color: #D1D5DB;
+            line-height: 1.6;
+            margin-bottom: 8px;
         }
         
         .size-variants {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
             justify-content: center;
-            margin: 20px 0;
+            margin: 60px 0;
+            max-width: 1200px;
         }
         
         .size-variant {
             text-align: center;
+            padding: 24px;
+            background: rgba(31, 41, 55, 0.4);
+            border-radius: 20px;
+            border: 1px solid rgba(232, 213, 183, 0.1);
         }
         
-        .size-variant .icon-container {
-            box-shadow: 0 4px 8px rgba(201, 169, 97, 0.2);
+        .size-variant h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #E8D5B7;
+            margin-bottom: 8px;
         }
         
-        .size-1024 { width: 200px; height: 200px; border-radius: 48px; }
-        .size-1024 .logo-text { font-size: 72px; letter-spacing: 3px; }
-        .size-1024 .atom-symbol { width: 48px; height: 48px; right: 32px; }
-        .size-1024 .atom-core { width: 8px; height: 8px; top: 20px; left: 20px; }
-        .size-1024 .orbit-1 { width: 48px; height: 48px; border-width: 1px; }
-        .size-1024 .orbit-2 { width: 36px; height: 36px; top: 6px; left: 6px; border-width: 1px; }
-        .size-1024 .orbit-3 { width: 24px; height: 24px; top: 12px; left: 12px; border-width: 1px; }
+        .size-variant p {
+            font-size: 14px;
+            color: #9CA3AF;
+            margin-bottom: 16px;
+        }
         
-        .size-512 { width: 150px; height: 150px; border-radius: 36px; }
-        .size-512 .logo-text { font-size: 54px; letter-spacing: 2px; }
-        .size-512 .atom-symbol { width: 36px; height: 36px; right: 24px; }
-        .size-512 .atom-core { width: 6px; height: 6px; top: 15px; left: 15px; }
-        .size-512 .orbit-1 { width: 36px; height: 36px; border-width: 1px; }
-        .size-512 .orbit-2 { width: 27px; height: 27px; top: 4px; left: 4px; border-width: 1px; }
-        .size-512 .orbit-3 { width: 18px; height: 18px; top: 9px; left: 9px; border-width: 1px; }
+        .size-1024 { width: 200px; height: 200px; border-radius: 48px; margin: 0 auto 16px; }
+        .size-1024 .logo-text { font-size: 64px; letter-spacing: 4px; }
+        .size-1024 .premium-symbol { width: 32px; height: 32px; right: 24px; top: 24px; border-radius: 8px; }
+        .size-1024 .premium-symbol::before { font-size: 16px; }
+        
+        .size-512 { width: 160px; height: 160px; border-radius: 38px; margin: 0 auto 16px; }
+        .size-512 .logo-text { font-size: 52px; letter-spacing: 3px; }
+        .size-512 .premium-symbol { width: 28px; height: 28px; right: 20px; top: 20px; border-radius: 7px; }
+        .size-512 .premium-symbol::before { font-size: 14px; }
+        
+        .size-256 { width: 120px; height: 120px; border-radius: 28px; margin: 0 auto 16px; }
+        .size-256 .logo-text { font-size: 38px; letter-spacing: 2px; }
+        .size-256 .premium-symbol { width: 20px; height: 20px; right: 15px; top: 15px; border-radius: 5px; }
+        .size-256 .premium-symbol::before { font-size: 10px; }
+        
+        .download-section {
+            margin: 60px 0;
+            text-align: center;
+        }
         
         .download-btn {
-            background: linear-gradient(135deg, #C9A961, #D4AF37);
-            color: #000;
+            background: linear-gradient(135deg, #E8D5B7, #F4E4BC, #D4AF37);
+            color: #1F2937;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
             cursor: pointer;
-            margin: 10px;
+            margin: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(232, 213, 183, 0.3);
         }
         
         .download-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(201, 169, 97, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(232, 213, 183, 0.4);
+        }
+        
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin: 40px 0;
+            max-width: 1000px;
+        }
+        
+        .asset-item {
+            background: rgba(31, 41, 55, 0.6);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(232, 213, 183, 0.1);
+        }
+        
+        .asset-preview {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 16px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
         }
     </style>
 </head>
 <body>
-    <h1>ZYRO Marketplace - Generador de Iconos</h1>
+    <div class="header">
+        <h1>ZYRO PREMIUM</h1>
+        <p>Generador de Assets de Nueva Generación</p>
+    </div>
     
     <div class="instructions">
-        <h2>📱 Instrucciones para Generar Assets</h2>
-        <p>1. Usa la herramienta de captura de pantalla de tu sistema</p>
-        <p>2. Captura cada icono individualmente</p>
-        <p>3. Guarda con los nombres especificados</p>
-        <p>4. Coloca los archivos en la carpeta <code>assets/</code></p>
+        <h2>🎨 Nueva Estética Premium</h2>
+        <p>Diseño completamente renovado con iconos SVG elegantes</p>
+        <p>Paleta de colores sofisticada y efectos de blur modernos</p>
+        <p>Experiencia de usuario premium y profesional</p>
     </div>
     
     <div class="size-variants">
         <div class="size-variant">
+            <h3>Icono Principal de App</h3>
+            <p>Para App Store y Google Play</p>
             <div class="icon-container size-1024">
-                <span class="logo-text">ZYR</span>
-                <div class="atom-symbol">
-                    <div class="atom-core"></div>
-                    <div class="atom-orbit orbit-1"></div>
-                    <div class="atom-orbit orbit-2"></div>
-                    <div class="atom-orbit orbit-3"></div>
-                </div>
+                <span class="logo-text">ZYRO</span>
+                <div class="premium-symbol"></div>
             </div>
-            <p><strong>icon.png</strong><br>1024x1024px<br>iOS App Store</p>
+            <p><strong>icon.png</strong> • 1024x1024px</p>
         </div>
         
         <div class="size-variant">
+            <h3>Icono Adaptativo</h3>
+            <p>Para Android y notificaciones</p>
             <div class="icon-container size-512">
-                <span class="logo-text">ZYR</span>
-                <div class="atom-symbol">
-                    <div class="atom-core"></div>
-                    <div class="atom-orbit orbit-1"></div>
-                    <div class="atom-orbit orbit-2"></div>
-                    <div class="atom-orbit orbit-3"></div>
-                </div>
+                <span class="logo-text">ZYRO</span>
+                <div class="premium-symbol"></div>
             </div>
-            <p><strong>adaptive-icon.png</strong><br>512x512px<br>Android</p>
+            <p><strong>adaptive-icon.png</strong> • 512x512px</p>
+        </div>
+        
+        <div class="size-variant">
+            <h3>Icono Compacto</h3>
+            <p>Para web y favicon</p>
+            <div class="icon-container size-256">
+                <span class="logo-text">ZYRO</span>
+                <div class="premium-symbol"></div>
+            </div>
+            <p><strong>favicon.png</strong> • 256x256px</p>
         </div>
     </div>
     

@@ -1,0 +1,25 @@
+{
+  "setup_fee": 150,
+  "plans": {
+    "plan_1_month": {
+      "name": "Plan Mensual",
+      "monthly_price": 29.99,
+      "duration_months": 1
+    },
+    "plan_3_months": {
+      "name": "Plan Trimestral",
+      "monthly_price": 27.99,
+      "duration_months": 3
+    },
+    "plan_6_months": {
+      "name": "Plan Semestral",
+      "monthly_price": 25.99,
+      "duration_months": 6
+    },
+    "plan_12_months": {
+      "name": "Plan Anual",
+      "monthly_price": 23.99,
+      "duration_months": 12
+    }
+  }
+}

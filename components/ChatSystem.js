@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import MinimalistIcons from './MinimalistIcons';
 import {
   View,
   Text,
@@ -84,7 +85,7 @@ export function ChatList({ currentUser, onConversationSelect }) {
     >
       <View style={styles.conversationAvatar}>
         <Text style={styles.conversationAvatarText}>
-          {item.participantRole === 'company' ? '🏢' : '👤'}
+          {item.participantRole === 'company' ? <MinimalistIcons name="business" size={20} /> : <MinimalistIcons name="profile" size={20} />}
         </Text>
       </View>
 

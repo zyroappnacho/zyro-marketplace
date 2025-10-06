@@ -102,7 +102,7 @@ describe('ZYRO Marketplace App', () => {
       'NotificationManager.js',
       'ChatSystem.js',
       'InteractiveMap.js',
-      'CollaborationDetailScreen.js'
+      'CollaborationDetailScreenNew.js'
     ];
     
     components.forEach(component => {

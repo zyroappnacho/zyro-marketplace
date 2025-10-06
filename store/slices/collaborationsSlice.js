@@ -96,6 +96,11 @@ const collaborationsSlice = createSlice({
         total: 0,
         hasMore: true
       };
+    },
+    setCollaborations: (state, action) => {
+      state.collaborations = action.payload;
+      state.isLoading = false;
+      state.error = null;
     }
   },
   extraReducers: (builder) => {
@@ -159,7 +164,8 @@ export const {
   setSelectedCollaboration,
   clearSelectedCollaboration,
   clearError,
-  resetPagination
+  resetPagination,
+  setCollaborations
 } = collaborationsSlice.actions;
 
 export default collaborationsSlice.reducer;
