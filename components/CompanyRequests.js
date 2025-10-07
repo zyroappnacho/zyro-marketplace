@@ -11,6 +11,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import MinimalistIcons from './MinimalistIcons';
 import { useDispatch } from 'react-redux';
 import { setCurrentScreen } from '../store/slices/uiSlice';
 import CollaborationRequestService from '../services/CollaborationRequestService';
@@ -327,7 +328,7 @@ const CompanyRequests = ({ navigation }) => {
               <Image source={{ uri: item.userProfileImage }} style={styles.avatar} />
             ) : (
               <View style={styles.avatarPlaceholder}>
-                <Ionicons name="person" size={24} color="#AAAAAA" />
+                <MinimalistIcons name="profile" size={24} color="#AAAAAA" />
               </View>
             )}
           </View>
@@ -365,13 +366,13 @@ const CompanyRequests = ({ navigation }) => {
         <Text style={styles.categoryText}>Categoría: {item.category}</Text>
         {item.selectedDate && (
           <View style={styles.dateTimeInfo}>
-            <Ionicons name="calendar-outline" size={14} color="#C9A961" />
+            <MinimalistIcons name="events" size={14} color="#C9A961" />
             <Text style={styles.dateText}>
               {new Date(item.selectedDate).toLocaleDateString('es-ES')}
             </Text>
             {item.selectedTime && (
               <>
-                <Ionicons name="time-outline" size={14} color="#C9A961" style={styles.timeIcon} />
+                <MinimalistIcons name="history" size={14} color="#C9A961" />
                 <Text style={styles.timeText}>{item.selectedTime}</Text>
               </>
             )}
@@ -390,7 +391,7 @@ const CompanyRequests = ({ navigation }) => {
         
         {item.status === 'pending' && activeTab === 'upcoming' && (
           <View style={styles.pendingInfo}>
-            <Ionicons name="information-circle-outline" size={16} color="#C9A961" />
+            <MinimalistIcons name="help" size={16} color="#C9A961" />
             <Text style={styles.pendingInfoText}>
               Solo el administrador puede aprobar o rechazar solicitudes
             </Text>
@@ -415,7 +416,7 @@ const CompanyRequests = ({ navigation }) => {
               );
             }}
           >
-            <Ionicons name="mail-outline" size={16} color="#C9A961" />
+            <MinimalistIcons name="message" size={16} color="#C9A961" />
             <Text style={styles.contactButtonText}>Contactar</Text>
           </TouchableOpacity>
         )}
@@ -435,7 +436,7 @@ const CompanyRequests = ({ navigation }) => {
             dispatch(setCurrentScreen('company'));
           }}
         >
-          <Ionicons name="arrow-back" size={24} color="#C9A961" />
+          <MinimalistIcons name="back" size={24} color="#C9A961" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Solicitudes de Influencers</Text>
         <View style={styles.headerSpacer} />
@@ -451,7 +452,7 @@ const CompanyRequests = ({ navigation }) => {
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <Ionicons name="hourglass-outline" size={24} color="#AAAAAA" />
+          <MinimalistIcons name="history" size={24} color="#AAAAAA" />
           <Text style={styles.loadingText}>Cargando solicitudes...</Text>
         </View>
       ) : currentRequests.length === 0 ? (

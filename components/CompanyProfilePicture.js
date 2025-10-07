@@ -7,6 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import MinimalistIcons from './MinimalistIcons';
 import * as ImagePicker from 'expo-image-picker';
 
 const CompanyProfilePicture = ({ imageUri, onImageUpdate }) => {
@@ -76,7 +77,7 @@ const CompanyProfilePicture = ({ imageUri, onImageUpdate }) => {
           <Image source={{ uri: imageUri }} style={styles.image} />
         ) : (
           <View style={styles.placeholderContainer}>
-            <Ionicons name="business-outline" size={40} color="#8E8E93" />
+            <MinimalistIcons name="business" size={40} color="#8E8E93" />
           </View>
         )}
         

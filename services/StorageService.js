@@ -622,6 +622,49 @@ class StorageService {
         }
       }
 
+      
+      // Agregar usuario de prueba de influencer si no existe
+      const testInfluencerExists = existingUsers.find(u => u.email === 'colabos.nachodeborbon@gmail.com');
+      if (!testInfluencerExists) {
+        const testInfluencerUser = {
+          id: 'influencer_test_001',
+          email: 'colabos.nachodeborbon@gmail.com',
+          password: 'Nacho12345',
+          role: 'influencer',
+          name: 'Náyades Colaboraciones',
+          fullName: 'Náyades Colaboraciones',
+          instagramUsername: '@nayades.colabos',
+          instagramFollowers: '125000',
+          tiktokUsername: '@nayades_colabos',
+          tiktokFollowers: '85000',
+          city: 'Madrid',
+          phone: '+34 600 123 456',
+          status: 'approved',
+          isActive: true,
+          approvedAt: new Date().toISOString(),
+          registrationDate: new Date().toISOString(),
+          profileImage: null,
+          verified: true,
+          followers: 125000,
+          instagram: '@nayades.colabos'
+        };
+        
+        // Guardar el usuario completo
+        await AsyncStorage.setItem(`approved_user_${testInfluencerUser.id}`, JSON.stringify(testInfluencerUser));
+        
+        // Agregar a la lista
+        existingUsers.push({
+          id: testInfluencerUser.id,
+          email: testInfluencerUser.email,
+          role: testInfluencerUser.role,
+          name: testInfluencerUser.name,
+          approvedAt: testInfluencerUser.approvedAt,
+          isActive: testInfluencerUser.isActive
+        });
+        
+        console.log('✅ Usuario de prueba de influencer creado: colabos.nachodeborbon@gmail.com');
+      }
+
       // Agregar usuario de prueba de administrador si no existe
       const testAdminExists = existingUsers.find(u => u.email === 'admin_zyrovip');
       if (!testAdminExists) {

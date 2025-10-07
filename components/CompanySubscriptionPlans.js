@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
+import MinimalistIcons from './MinimalistIcons';
 import StorageService from '../services/StorageService';
 import StripeService from '../services/StripeService';
 
@@ -503,7 +504,7 @@ const CompanySubscriptionPlans = ({ navigation }) => {
 
         <View style={styles.planDetailsSection}>
           <View style={styles.detailRow}>
-            <Ionicons name="calendar-outline" size={20} color="#C9A961" />
+            <MinimalistIcons name="events" size={20} color="#C9A961" />
             <View style={styles.detailContent}>
               <Text style={styles.detailLabel}>Duración del Plan</Text>
               <Text style={styles.detailValue}>{currentPlan.duration || 6} meses</Text>
@@ -511,7 +512,7 @@ const CompanySubscriptionPlans = ({ navigation }) => {
           </View>
 
           <View style={styles.detailRow}>
-            <Ionicons name="card-outline" size={20} color="#C9A961" />
+            <MinimalistIcons name="target" size={20} color="#C9A961" />
             <View style={styles.detailContent}>
               <Text style={styles.detailLabel}>Próxima Facturación</Text>
               <Text style={styles.detailValue}>
@@ -521,7 +522,7 @@ const CompanySubscriptionPlans = ({ navigation }) => {
           </View>
 
           <View style={styles.detailRow}>
-            <Ionicons name="checkmark-circle-outline" size={20} color="#C9A961" />
+            <MinimalistIcons name="check" size={20} color="#C9A961" />
             <View style={styles.detailContent}>
               <Text style={styles.detailLabel}>Fecha de Activación</Text>
               <Text style={styles.detailValue}>
@@ -533,7 +534,7 @@ const CompanySubscriptionPlans = ({ navigation }) => {
 
         <View style={styles.adminContactSection}>
           <View style={styles.adminContactCard}>
-            <Ionicons name="person-circle-outline" size={24} color="#C9A961" />
+            <MinimalistIcons name="profile" size={24} color="#C9A961" />
             <View style={styles.adminContactContent}>
               <Text style={styles.adminContactTitle}>Gestión de Suscripción</Text>
               <Text style={styles.adminContactText}>
@@ -555,7 +556,7 @@ const CompanySubscriptionPlans = ({ navigation }) => {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
-            <Ionicons name="arrow-back" size={24} color="#C9A961" />
+            <MinimalistIcons name="back" size={24} color="#C9A961" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Gestionar Suscripción</Text>
           <View style={styles.placeholder} />
@@ -571,7 +572,7 @@ const CompanySubscriptionPlans = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
-          <Ionicons name="arrow-back" size={24} color="#C9A961" />
+          <MinimalistIcons name="back" size={24} color="#C9A961" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Gestionar Suscripción</Text>
         <View style={styles.placeholder} />
@@ -591,7 +592,7 @@ const CompanySubscriptionPlans = ({ navigation }) => {
         {/* Información adicional */}
         <View style={styles.infoSection}>
           <View style={styles.infoCard}>
-            <Ionicons name="information-circle" size={24} color="#C9A961" />
+            <MinimalistIcons name="help" size={24} color="#C9A961" />
             <View style={styles.infoContent}>
               <Text style={styles.infoTitle}>Información de Suscripción</Text>
               <Text style={styles.infoText}>

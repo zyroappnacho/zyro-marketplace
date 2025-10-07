@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
+import MinimalistIcons from './MinimalistIcons';
 import StorageService from '../services/StorageService';
 
 const CompanyPasswordScreen = ({ navigation }) => {
@@ -220,7 +221,7 @@ const CompanyPasswordScreen = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#C9A961" />
+          <MinimalistIcons name="back" size={24} color="#C9A961" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Contraseña y Seguridad</Text>
       </View>
@@ -229,7 +230,7 @@ const CompanyPasswordScreen = ({ navigation }) => {
         {/* Información del usuario */}
         <View style={styles.userInfoCard}>
           <View style={styles.userInfoHeader}>
-            <Ionicons name="business" size={32} color="#C9A961" />
+            <MinimalistIcons name="business" size={32} color="#C9A961" />
             <View style={styles.userInfo}>
               <Text style={styles.companyName}>{user.companyName || user.fullName}</Text>
               <Text style={styles.userEmail}>{user.email}</Text>
@@ -272,7 +273,7 @@ const CompanyPasswordScreen = ({ navigation }) => {
         {/* Información de seguridad */}
         <View style={styles.securityInfo}>
           <View style={styles.securityCard}>
-            <Ionicons name="shield-checkmark" size={24} color="#34C759" />
+            <MinimalistIcons name="check" size={24} color="#34C759" />
             <View style={styles.securityContent}>
               <Text style={styles.securityTitle}>Seguridad de la Contraseña</Text>
               <Text style={styles.securityText}>
@@ -285,7 +286,7 @@ const CompanyPasswordScreen = ({ navigation }) => {
           </View>
 
           <View style={styles.infoCard}>
-            <Ionicons name="information-circle" size={24} color="#C9A961" />
+            <MinimalistIcons name="help" size={24} color="#C9A961" />
             <View style={styles.infoContent}>
               <Text style={styles.infoTitle}>Importante</Text>
               <Text style={styles.infoText}>

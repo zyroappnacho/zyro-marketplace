@@ -3,7 +3,7 @@
 
 class ApiService {
   constructor() {
-    this.baseURL = 'https://api.zyro.com/v1'; // Replace with actual API URL
+    this.baseURL = 'https://zyro-marketplace.onrender.com/api';
     this.timeout = 10000;
   }
 

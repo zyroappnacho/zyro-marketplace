@@ -2669,6 +2669,18 @@ Procesamos tu información personal basándonos en:
 • **Web**: www.aepd.es
 • **Teléfono**: 901 100 099
 
+## 9. ¿Quién es responsable de procesar tus datos?
+
+### 9.1 Responsable del Tratamiento
+• **Nombre de la empresa**: Influence Media Lab
+• **APP**: ZYRO MARKETPLACE
+• **Tax ID (CIF)**: B87932869
+• **Oficina de registro**: C/ Ríos Rosas, 44 6ºA, 28003, Madrid, Spain
+• **Email de contacto**: nacho.borbon@wearemi6.com
+
+### 9.2 Contacto para Asuntos de Privacidad
+Para cualquier consulta relacionada con el tratamiento de tus datos personales, ejercicio de derechos GDPR, o cuestiones de privacidad, puedes contactarnos directamente a través del email de contacto proporcionado.
+
 ---
 
 **Última actualización:** 22 de septiembre de 2025

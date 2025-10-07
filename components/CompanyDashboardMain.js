@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
+import MinimalistIcons from './MinimalistIcons';
 import { setCurrentScreen } from '../store/slices/uiSlice';
 import StorageService from '../services/StorageService';
 import EMVCalculationService from '../services/EMVCalculationService';
@@ -231,14 +232,14 @@ const CompanyDashboardMain = ({ navigation }) => {
       disabled={isLoading}
     >
       <View style={styles.cardHeader}>
-        <Ionicons name={icon} size={28} color={color} />
+        <MinimalistIcons name={icon} size={28} color={color} />
       </View>
       <Text style={styles.cardTitle}>{title}</Text>
       {subtitle && <Text style={styles.cardSubtitle}>{subtitle}</Text>}
       <Text style={styles.cardValue}>{isLoading ? '...' : value}</Text>
       {onPress && (
         <View style={styles.cardAction}>
-          <Ionicons name="information-circle-outline" size={20} color={color} />
+          <MinimalistIcons name="help" size={20} color={color} />
         </View>
       )}
     </TouchableOpacity>
@@ -251,14 +252,14 @@ const CompanyDashboardMain = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => dispatch(setCurrentScreen('company'))}
         >
-          <Ionicons name="arrow-back" size={24} color="#C9A961" />
+          <MinimalistIcons name="back" size={24} color="#C9A961" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Dashboard de Empresa</Text>
         <TouchableOpacity
           style={styles.refreshButton}
           onPress={loadDashboardData}
         >
-          <Ionicons name="refresh" size={24} color="#C9A961" />
+          <MinimalistIcons name="refresh" size={24} color="#C9A961" />
         </TouchableOpacity>
       </View>
 
@@ -275,7 +276,7 @@ const CompanyDashboardMain = ({ navigation }) => {
               <DashboardCard
                 title="Colaboraciones"
                 value={dashboardStats.totalCollaborations}
-                icon="people-circle"
+                icon="users"
                 color="#C9A961"
                 subtitle="Total realizadas"
               />
@@ -284,7 +285,7 @@ const CompanyDashboardMain = ({ navigation }) => {
               <DashboardCard
                 title="Historias Instagram"
                 value={dashboardStats.instagramStories}
-                icon="logo-instagram"
+                icon="instagram"
                 color="#E4405F"
                 subtitle="Publicadas por influencers"
               />
@@ -296,7 +297,7 @@ const CompanyDashboardMain = ({ navigation }) => {
                   EMVCalculationService.formatEMV(dashboardStats.instagramEMV) : 
                   '€0'
                 }
-                icon="trending-up"
+                icon="trending"
                 color="#007AFF"
                 subtitle="Valor mediático equivalente"
                 onPress={handleEMVDetails}
@@ -314,7 +315,7 @@ const CompanyDashboardMain = ({ navigation }) => {
               <Text style={styles.sectionTitle}>Alcance e Impacto</Text>
               <View style={styles.metricsGrid}>
                 <View style={styles.metricCard}>
-                  <Ionicons name="people" size={24} color="#34C759" />
+                  <MinimalistIcons name="users" size={24} color="#34C759" />
                   <Text style={styles.metricValue}>
                     {CompanyAnalyticsService.formatLargeNumber(analytics.reach.totalFollowers)}
                   </Text>
@@ -322,7 +323,7 @@ const CompanyDashboardMain = ({ navigation }) => {
                 </View>
                 
                 <View style={styles.metricCard}>
-                  <Ionicons name="eye" size={24} color="#FF9500" />
+                  <MinimalistIcons name="trending" size={24} color="#FF9500" />
                   <Text style={styles.metricValue}>
                     {CompanyAnalyticsService.formatLargeNumber(analytics.reach.totalImpressions)}
                   </Text>
@@ -336,13 +337,13 @@ const CompanyDashboardMain = ({ navigation }) => {
               <Text style={styles.sectionTitle}>Eficiencia Operativa</Text>
               <View style={styles.metricsGrid}>
                 <View style={styles.metricCard}>
-                  <Ionicons name="checkmark-circle" size={24} color="#34C759" />
+                  <MinimalistIcons name="check" size={24} color="#34C759" />
                   <Text style={styles.metricValue}>{analytics.efficiency.approvalRate}%</Text>
                   <Text style={styles.metricLabel}>Tasa de Aprobación</Text>
                 </View>
                 
                 <View style={styles.metricCard}>
-                  <Ionicons name="time" size={24} color="#007AFF" />
+                  <MinimalistIcons name="history" size={24} color="#007AFF" />
                   <Text style={styles.metricValue}>{analytics.efficiency.averageDaysToCollaboration}</Text>
                   <Text style={styles.metricLabel}>Días Promedio</Text>
                 </View>
@@ -354,13 +355,13 @@ const CompanyDashboardMain = ({ navigation }) => {
               <Text style={styles.sectionTitle}>Gestión de Influencers</Text>
               <View style={styles.metricsGrid}>
                 <View style={styles.metricCard}>
-                  <Ionicons name="person-add" size={24} color="#C9A961" />
+                  <MinimalistIcons name="profile" size={24} color="#C9A961" />
                   <Text style={styles.metricValue}>{analytics.influencers.uniqueInfluencers}</Text>
                   <Text style={styles.metricLabel}>Influencers Únicos</Text>
                 </View>
                 
                 <View style={styles.metricCard}>
-                  <Ionicons name="repeat" size={24} color="#8E44AD" />
+                  <MinimalistIcons name="star" size={24} color="#8E44AD" />
                   <Text style={styles.metricValue}>{analytics.influencers.recurrentInfluencers}</Text>
                   <Text style={styles.metricLabel}>Influencers Recurrentes</Text>
                 </View>
@@ -377,8 +378,8 @@ const CompanyDashboardMain = ({ navigation }) => {
                     styles.trendBadge, 
                     { backgroundColor: analytics.temporal.monthlyGrowth >= 0 ? '#34C759' : '#FF3B30' }
                   ]}>
-                    <Ionicons 
-                      name={analytics.temporal.monthlyGrowth >= 0 ? 'trending-up' : 'trending-down'} 
+                    <MinimalistIcons 
+                      name="trending" 
                       size={12} 
                       color="#FFFFFF" 
                     />

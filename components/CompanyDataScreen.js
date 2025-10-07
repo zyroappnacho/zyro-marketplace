@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
+import MinimalistIcons from './MinimalistIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { setCurrentScreen } from '../store/slices/uiSlice';
 import { updateUser } from '../store/slices/authSlice';
@@ -544,7 +545,7 @@ const CompanyDataScreen = () => {
           style={styles.backButton}
           onPress={() => dispatch(setCurrentScreen('company'))}
         >
-          <Ionicons name="arrow-back" size={24} color="#C9A961" />
+          <MinimalistIcons name="back" size={24} color="#C9A961" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Datos de la Empresa</Text>
         <View style={styles.headerButtons}>
@@ -552,14 +553,14 @@ const CompanyDataScreen = () => {
             style={styles.fixButton}
             onPress={handleFixData}
           >
-            <Ionicons name="refresh" size={20} color="#C9A961" />
+            <MinimalistIcons name="refresh" size={20} color="#C9A961" />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.editButton}
             onPress={() => isEditing ? handleCancel() : setIsEditing(true)}
           >
-            <Ionicons 
-              name={isEditing ? "close" : "pencil"} 
+            <MinimalistIcons 
+              name={isEditing ? "close" : "edit"} 
               size={24} 
               color="#C9A961" 
             />

@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
+import MinimalistIcons from './MinimalistIcons';
 import * as ImagePicker from 'expo-image-picker';
 import { logoutUser, updateUser } from '../store/slices/authSlice';
 import { setCurrentScreen } from '../store/slices/uiSlice';
@@ -490,7 +491,7 @@ const CompanyDashboard = ({ navigation }) => {
         
         <View style={styles.campaignStats}>
           <View style={styles.statItem}>
-            <Ionicons name="people" size={16} color="#FFFFFF" />
+            <MinimalistIcons name="users" size={16} color="#FFFFFF" />
             <Text style={styles.statText}>
               {item.minFollowers >= 1000 
                 ? `${(item.minFollowers / 1000).toFixed(0)}K min`
@@ -499,11 +500,11 @@ const CompanyDashboard = ({ navigation }) => {
             </Text>
           </View>
           <View style={styles.statItem}>
-            <Ionicons name="location" size={16} color="#FFFFFF" />
+            <MinimalistIcons name="location" size={16} color="#FFFFFF" />
             <Text style={styles.statText}>{item.city}</Text>
           </View>
           <View style={styles.statItem}>
-            <Ionicons name="pricetag" size={16} color="#FFFFFF" />
+            <MinimalistIcons name="target" size={16} color="#FFFFFF" />
             <Text style={styles.statText}>{item.category}</Text>
           </View>
         </View>
@@ -553,7 +554,7 @@ const CompanyDashboard = ({ navigation }) => {
               style={styles.profileImage}
             />
             <View style={styles.cameraOverlay}>
-              <Ionicons name="camera" size={20} color="#FFFFFF" />
+              <MinimalistIcons name="edit" size={20} color="#FFFFFF" />
             </View>
           </TouchableOpacity>
           <Text style={styles.companyName}>
@@ -597,7 +598,7 @@ const CompanyDashboard = ({ navigation }) => {
             </View>
           ) : (
             <View style={styles.noCollaborationCard}>
-              <Ionicons name="megaphone-outline" size={48} color="#666666" />
+              <MinimalistIcons name="campaign" size={48} color="#666666" />
               <Text style={styles.noCollaborationTitle}>Sin colaboraciones activas</Text>
               <Text style={styles.noCollaborationText}>
                 No se encontraron colaboraciones que coincidan con "{companyName}".
@@ -619,54 +620,54 @@ const CompanyDashboard = ({ navigation }) => {
             style={styles.actionButton}
             onPress={() => dispatch(setCurrentScreen('company-dashboard-main'))}
           >
-            <Ionicons name="analytics" size={24} color="#FFFFFF" />
+            <MinimalistIcons name="chart" size={24} color="#FFFFFF" />
             <Text style={styles.actionButtonText}>Dashboard de Empresa</Text>
-            <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+            <MinimalistIcons name="arrow" size={20} color="#FFFFFF" />
           </TouchableOpacity>
 
           <TouchableOpacity 
             style={styles.actionButton}
             onPress={() => dispatch(setCurrentScreen('company-requests'))}
           >
-            <Ionicons name="people" size={24} color="#FFFFFF" />
+            <MinimalistIcons name="users" size={24} color="#FFFFFF" />
             <Text style={styles.actionButtonText}>Solicitudes de Influencers</Text>
-            <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+            <MinimalistIcons name="arrow" size={20} color="#FFFFFF" />
           </TouchableOpacity>
           
           <TouchableOpacity 
             style={styles.actionButton}
             onPress={() => dispatch(setCurrentScreen('company-data'))}
           >
-            <Ionicons name="business" size={24} color="#FFFFFF" />
+            <MinimalistIcons name="business" size={24} color="#FFFFFF" />
             <Text style={styles.actionButtonText}>Datos de la Empresa</Text>
-            <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+            <MinimalistIcons name="arrow" size={20} color="#FFFFFF" />
           </TouchableOpacity>
 
           <TouchableOpacity 
             style={styles.actionButton}
             onPress={() => dispatch(setCurrentScreen('company-locations'))}
           >
-            <Ionicons name="location" size={24} color="#FFFFFF" />
+            <MinimalistIcons name="location" size={24} color="#FFFFFF" />
             <Text style={styles.actionButtonText}>Locales</Text>
-            <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+            <MinimalistIcons name="arrow" size={20} color="#FFFFFF" />
           </TouchableOpacity>
 
           <TouchableOpacity 
             style={styles.actionButton}
             onPress={() => navigation?.navigate('subscription-plans')}
           >
-            <Ionicons name="pricetags" size={24} color="#FFFFFF" />
+            <MinimalistIcons name="target" size={24} color="#FFFFFF" />
             <Text style={styles.actionButtonText}>Gestionar Planes de Suscripción</Text>
-            <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+            <MinimalistIcons name="arrow" size={20} color="#FFFFFF" />
           </TouchableOpacity>
 
           <TouchableOpacity 
             style={styles.actionButton}
             onPress={() => navigation?.navigate('CompanyPasswordScreen')}
           >
-            <Ionicons name="lock-closed" size={24} color="#FFFFFF" />
+            <MinimalistIcons name="settings" size={24} color="#FFFFFF" />
             <Text style={styles.actionButtonText}>Contraseña y Seguridad</Text>
-            <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+            <MinimalistIcons name="arrow" size={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
 

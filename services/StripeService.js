@@ -12,7 +12,7 @@ class StripeService {
     this.stripe = null;
     // Usar URL de producción o desarrollo según el entorno
     this.baseURL = process.env.NODE_ENV === 'production' 
-      ? 'https://zyromarketplace.com/api' 
+      ? 'https://zyro-marketplace.onrender.com/api' 
       : 'http://localhost:3001';
     this.initializeStripe();
   }
@@ -133,10 +133,10 @@ class StripeService {
           price: totalFirstPayment // Precio total del primer pago
         },
         success_url: process.env.NODE_ENV === 'production' 
-          ? `https://zyromarketplace.com/payment/success?session_id={CHECKOUT_SESSION_ID}`
+          ? `https://zyro-marketplace.onrender.com/payment/success?session_id={CHECKOUT_SESSION_ID}`
           : `http://localhost:3000/payment/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: process.env.NODE_ENV === 'production'
-          ? `https://zyromarketplace.com/payment/cancel`
+          ? `https://zyro-marketplace.onrender.com/payment/cancel`
           : `http://localhost:3000/payment/cancel`,
         metadata: {
           company_id: companyData.id,

@@ -4,20 +4,23 @@
     "slug": "zyro-marketplace",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logozyrotransparente.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/logozyrotransparente.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
+    "platforms": [
+      "ios"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.zyro.marketplace",
-      "buildNumber": "2",
+      "bundleIdentifier": "com.nachodeborbon.zyromarketplace",
+      "buildNumber": "1",
       "deploymentTarget": "13.0",
       "requireFullScreen": false,
       "infoPlist": {
@@ -36,30 +39,7 @@
       },
       "config": {
         "usesNonExemptEncryption": false
-      },
-      "simulator": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/logozyrotransparente.png",
-        "backgroundColor": "#000000"
-      },
-      "package": "com.zyro.marketplace",
-      "versionCode": 1,
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.RECEIVE_BOOT_COMPLETED",
-        "android.permission.VIBRATE",
-        "android.permission.WAKE_LOCK"
-      ]
-    },
-    "web": {
-      "favicon": "./assets/logozyrotransparente.png",
-      "bundler": "metro"
+      }
     },
     "plugins": [
       "expo-notifications",
@@ -82,17 +62,15 @@
       ]
     ],
     "notification": {
-      "icon": "./assets/logozyrotransparente.png",
-      "color": "#C9A961",
-      "androidMode": "default",
-      "androidCollapsedTitle": "ZYRO Marketplace"
+      "icon": "./assets/icon.png",
+      "color": "#C9A961"
     },
     "extra": {
       "eas": {
-        "projectId": "your-project-id-here"
+        "projectId": "f317c76a-27e7-43e9-b5eb-df12fbea32cb"
       }
     },
-    "owner": "your-expo-username",
+    "owner": "nachodeborbon",
     "privacy": "unlisted",
     "scheme": "zyro-marketplace"
   }

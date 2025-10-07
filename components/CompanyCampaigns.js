@@ -8,6 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import MinimalistIcons from './MinimalistIcons';
 
 const CompanyCampaigns = ({ companyId }) => {
   const [campaigns, setCampaigns] = useState([]);
@@ -122,17 +123,17 @@ const CompanyCampaigns = ({ companyId }) => {
       
       <View style={styles.campaignDetails}>
         <View style={styles.detailItem}>
-          <Ionicons name="cash-outline" size={16} color="#007AFF" />
+          <MinimalistIcons name="target" size={16} color="#007AFF" />
           <Text style={styles.detailText}>Presupuesto: {item.budget}</Text>
         </View>
         
         <View style={styles.detailItem}>
-          <Ionicons name="people-outline" size={16} color="#007AFF" />
+          <MinimalistIcons name="users" size={16} color="#007AFF" />
           <Text style={styles.detailText}>Solicitudes: {item.applicants}</Text>
         </View>
         
         <View style={styles.detailItem}>
-          <Ionicons name="pricetag-outline" size={16} color="#007AFF" />
+          <MinimalistIcons name="target" size={16} color="#007AFF" />
           <Text style={styles.detailText}>Categoría: {item.category}</Text>
         </View>
       </View>
@@ -148,7 +149,7 @@ const CompanyCampaigns = ({ companyId }) => {
   if (loading && campaigns.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <Ionicons name="hourglass-outline" size={24} color="#8E8E93" />
+        <MinimalistIcons name="history" size={24} color="#8E8E93" />
         <Text style={styles.loadingText}>Cargando campañas...</Text>
       </View>
     );
@@ -157,7 +158,7 @@ const CompanyCampaigns = ({ companyId }) => {
   if (campaigns.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <Ionicons name="megaphone-outline" size={48} color="#C7C7CC" />
+        <MinimalistIcons name="campaign" size={48} color="#C7C7CC" />
         <Text style={styles.emptyTitle}>No hay campañas</Text>
         <Text style={styles.emptyText}>
           Aún no tienes campañas de colaboración creadas.

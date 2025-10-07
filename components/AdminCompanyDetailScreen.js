@@ -10,6 +10,7 @@ import {
   Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import MinimalistIcons from './MinimalistIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 import StorageService from '../services/StorageService';
 import CompanyDataSyncService from '../services/CompanyDataSyncService';
@@ -528,7 +529,7 @@ const AdminCompanyDetailScreen = ({ navigation, route }) => {
   const renderDataField = (label, value, icon = null) => (
     <View style={styles.dataField}>
       <View style={styles.fieldHeader}>
-        {icon && <Ionicons name={icon} size={20} color="#C9A961" style={styles.fieldIcon} />}
+        {icon && <MinimalistIcons name={icon || 'help'} size={20} color="#C9A961" />}
         <Text style={styles.fieldLabel}>{label}</Text>
       </View>
       <View style={styles.fieldValueContainer}>
@@ -540,7 +541,7 @@ const AdminCompanyDetailScreen = ({ navigation, route }) => {
   const renderSection = (title, children, icon = null) => (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
-        {icon && <Ionicons name={icon} size={24} color="#C9A961" style={styles.sectionIcon} />}
+        {icon && <MinimalistIcons name={icon || 'help'} size={24} color="#C9A961" />}
         <Text style={styles.sectionTitle}>{title}</Text>
       </View>
       {children}
@@ -578,7 +579,7 @@ const AdminCompanyDetailScreen = ({ navigation, route }) => {
           style={styles.headerBackButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#C9A961" />
+          <MinimalistIcons name="back" size={24} color="#C9A961" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Detalles de Empresa</Text>
         <View style={styles.headerActions}>
@@ -586,7 +587,7 @@ const AdminCompanyDetailScreen = ({ navigation, route }) => {
             style={styles.refreshButton}
             onPress={loadCompanyDetails}
           >
-            <Ionicons name="refresh" size={20} color="#C9A961" />
+            <MinimalistIcons name="refresh" size={20} color="#C9A961" />
           </TouchableOpacity>
         </View>
       </View>
@@ -596,52 +597,52 @@ const AdminCompanyDetailScreen = ({ navigation, route }) => {
         {renderSection('Información Básica', (
           <View>
             {renderDataField('Nombre de la Empresa', companyData.companyName, 'business')}
-            {renderDataField('CIF/NIF', companyData.cifNif, 'document-text')}
+            {renderDataField('CIF/NIF', companyData.cifNif, 'help')}
             {renderDataField('Dirección', companyData.companyAddress, 'location')}
-            {renderDataField('Teléfono', companyData.companyPhone, 'call')}
-            {renderDataField('Email Corporativo', companyData.companyEmail, 'mail')}
-            {renderDataField('Sitio Web', companyData.website, 'globe')}
+            {renderDataField('Teléfono', companyData.companyPhone, 'phone')}
+            {renderDataField('Email Corporativo', companyData.companyEmail, 'message')}
+            {renderDataField('Sitio Web', companyData.website, 'world')}
           </View>
         ), 'business')}
 
         {/* Representante Legal */}
         {renderSection('Representante Legal', (
           <View>
-            {renderDataField('Nombre Completo', companyData.representativeName, 'person')}
-            {renderDataField('Email', companyData.representativeEmail, 'mail')}
+            {renderDataField('Nombre Completo', companyData.representativeName, 'profile')}
+            {renderDataField('Email', companyData.representativeEmail, 'message')}
             {renderDataField('Cargo/Posición', companyData.representativePosition, 'briefcase')}
           </View>
-        ), 'person-circle')}
+        ), 'profile')}
 
         {/* Información del Negocio */}
         {renderSection('Información del Negocio', (
           <View>
-            {renderDataField('Tipo de Negocio', companyData.businessType, 'storefront')}
-            {renderDataField('Descripción del Negocio', companyData.businessDescription, 'document-text')}
+            {renderDataField('Tipo de Negocio', companyData.businessType, 'business')}
+            {renderDataField('Descripción del Negocio', companyData.businessDescription, 'help')}
           </View>
-        ), 'storefront')}
+        ), 'business')}
 
         {/* Información de Suscripción */}
         {renderSection('Suscripción y Pagos', (
           <View>
-            {renderDataField('Plan Actual', getDisplayPlanInfo().name, 'card')}
-            {renderDataField('Precio Mensual', `€${getDisplayPlanInfo().price}`, 'cash')}
-            {renderDataField('Duración del Plan', `${getDisplayPlanInfo().duration} meses`, 'time')}
-            {renderDataField('Total del Plan', `€${getDisplayPlanInfo().totalPrice}`, 'calculator')}
-            {renderDataField('Método de Pago', subscriptionData?.paymentMethod?.name || companyData.paymentMethodName || 'Stripe', 'card')}
-            {renderDataField('Estado de Pago', getPaymentStatusText(companyData), 'checkmark-circle')}
+            {renderDataField('Plan Actual', getDisplayPlanInfo().name, 'target')}
+            {renderDataField('Precio Mensual', `€${getDisplayPlanInfo().price}`, 'target')}
+            {renderDataField('Duración del Plan', `${getDisplayPlanInfo().duration} meses`, 'history')}
+            {renderDataField('Total del Plan', `€${getDisplayPlanInfo().totalPrice}`, 'target')}
+            {renderDataField('Método de Pago', subscriptionData?.paymentMethod?.name || companyData.paymentMethodName || 'Stripe', 'target')}
+            {renderDataField('Estado de Pago', getPaymentStatusText(companyData), 'check')}
           </View>
-        ), 'card')}
+        ), 'target')}
 
         {/* Fechas Importantes */}
         {renderSection('Fechas Importantes', (
           <View>
-            {renderDataField('Fecha de Registro', companyData.registrationDate ? new Date(companyData.registrationDate).toLocaleDateString() : 'No disponible', 'calendar')}
-            {renderDataField('Primer Pago Completado', companyData.firstPaymentCompletedDate ? new Date(companyData.firstPaymentCompletedDate).toLocaleDateString() : 'No disponible', 'calendar')}
-            {renderDataField('Próximo Pago', companyData.nextBillingDate ? new Date(companyData.nextBillingDate).toLocaleDateString() : 'No programado', 'calendar')}
-            {renderDataField('Última Actualización', companyData.lastSaved ? new Date(companyData.lastSaved).toLocaleDateString() : 'No disponible', 'time')}
+            {renderDataField('Fecha de Registro', companyData.registrationDate ? new Date(companyData.registrationDate).toLocaleDateString() : 'No disponible', 'events')}
+            {renderDataField('Primer Pago Completado', companyData.firstPaymentCompletedDate ? new Date(companyData.firstPaymentCompletedDate).toLocaleDateString() : 'No disponible', 'events')}
+            {renderDataField('Próximo Pago', companyData.nextBillingDate ? new Date(companyData.nextBillingDate).toLocaleDateString() : 'No programado', 'events')}
+            {renderDataField('Última Actualización', companyData.lastSaved ? new Date(companyData.lastSaved).toLocaleDateString() : 'No disponible', 'history')}
           </View>
-        ), 'calendar')}
+        ), 'events')}
 
         {/* Imagen de Perfil si existe */}
         {companyData.profileImage && renderSection('Imagen de Perfil', (
@@ -662,25 +663,24 @@ const AdminCompanyDetailScreen = ({ navigation, route }) => {
                 styles.statusBadge,
                 getAccountStatus(companyData) === 'active' ? styles.statusActive : styles.statusPending
               ]}>
-                <Ionicons 
-                  name={getAccountStatus(companyData) === 'active' ? 'checkmark-circle' : 'time'} 
+                <MinimalistIcons 
+                  name={getAccountStatus(companyData) === 'active' ? 'check' : 'history'} 
                   size={20} 
-                  color="#FFFFFF" 
-                  style={styles.statusIcon}
+                  color="#FFFFFF"
                 />
                 <Text style={styles.statusText}>
                   {getAccountStatusText(companyData)}
                 </Text>
               </View>
             </View>
-            {renderDataField('ID de la Empresa', companyData.id, 'key')}
-            {renderDataField('Versión de Datos', companyData.version || '1.0', 'code-working')}
+            {renderDataField('ID de la Empresa', companyData.id, 'help')}
+            {renderDataField('Versión de Datos', companyData.version || '1.0', 'help')}
             
             {/* Estado de Sincronización */}
             {lastSyncUpdate && (
               <View style={styles.syncStatusContainer}>
                 <View style={styles.syncBadge}>
-                  <Ionicons name="sync" size={16} color="#34C759" style={styles.syncIcon} />
+                  <MinimalistIcons name="refresh" size={16} color="#34C759" />
                   <Text style={styles.syncText}>
                     Sincronizado: {new Date(lastSyncUpdate).toLocaleString()}
                   </Text>
@@ -697,7 +697,7 @@ const AdminCompanyDetailScreen = ({ navigation, route }) => {
             {companyData.dataSource && (
               <View style={styles.dataSourceContainer}>
                 <View style={styles.dataSourceBadge}>
-                  <Ionicons name="information-circle" size={16} color="#007AFF" style={styles.dataSourceIcon} />
+                  <MinimalistIcons name="help" size={16} color="#007AFF" />
                   <Text style={styles.dataSourceText}>
                     Datos cargados desde: {companyData.dataSource === 'multiple_sources' ? 'Múltiples fuentes' : companyData.dataSource}
                   </Text>

@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import MinimalistIcons from './MinimalistIcons';
 import { useSelector } from 'react-redux';
 import StorageService from '../services/StorageService';
 
@@ -144,18 +145,18 @@ const CompanyLocationsScreen = ({ onBack }) => {
                     style={styles.mapsButton}
                     onPress={() => handleOpenMaps(item)}
                 >
-                    <Ionicons name="location" size={20} color="#4A90E2" />
+                    <MinimalistIcons name="location" size={20} color="#4A90E2" />
                 </TouchableOpacity>
             </View>
             
             <View style={styles.locationInfoRow}>
-                <Ionicons name="location-outline" size={16} color="#CCCCCC" />
+                <MinimalistIcons name="location" size={16} color="#CCCCCC" />
                 <Text style={styles.locationInfoText}>{item.address}</Text>
             </View>
             
             {item.city && (
                 <View style={styles.locationInfoRow}>
-                    <Ionicons name="business-outline" size={16} color="#CCCCCC" />
+                    <MinimalistIcons name="business" size={16} color="#CCCCCC" />
                     <Text style={styles.locationInfoText}>{item.city}</Text>
                 </View>
             )}
@@ -165,7 +166,7 @@ const CompanyLocationsScreen = ({ onBack }) => {
                     style={styles.locationInfoRow}
                     onPress={() => handleCallPhone(item.phone)}
                 >
-                    <Ionicons name="call-outline" size={16} color="#4A90E2" />
+                    <MinimalistIcons name="phone" size={16} color="#4A90E2" />
                     <Text style={[styles.locationInfoText, styles.clickableText]}>{item.phone}</Text>
                 </TouchableOpacity>
             )}
@@ -175,7 +176,7 @@ const CompanyLocationsScreen = ({ onBack }) => {
                     style={styles.locationInfoRow}
                     onPress={() => handleSendEmail(item.email)}
                 >
-                    <Ionicons name="mail-outline" size={16} color="#4A90E2" />
+                    <MinimalistIcons name="message" size={16} color="#4A90E2" />
                     <Text style={[styles.locationInfoText, styles.clickableText]}>{item.email}</Text>
                 </TouchableOpacity>
             )}
@@ -205,7 +206,7 @@ const CompanyLocationsScreen = ({ onBack }) => {
                 style={styles.header}
             >
                 <TouchableOpacity style={styles.backButton} onPress={onBack}>
-                    <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+                    <MinimalistIcons name="back" size={24} color="#FFFFFF" />
                 </TouchableOpacity>
                 <View style={styles.headerContent}>
                     <Text style={styles.headerTitle}>Mis Locales</Text>
@@ -219,12 +220,12 @@ const CompanyLocationsScreen = ({ onBack }) => {
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                 {isLoading ? (
                     <View style={styles.loadingContainer}>
-                        <Ionicons name="location" size={48} color="#C9A961" />
+                        <MinimalistIcons name="location" size={48} color="#C9A961" />
                         <Text style={styles.loadingText}>Cargando locales...</Text>
                     </View>
                 ) : locations.length === 0 ? (
                     <View style={styles.emptyContainer}>
-                        <Ionicons name="business-outline" size={64} color="#666666" />
+                        <MinimalistIcons name="business" size={64} color="#666666" />
                         <Text style={styles.emptyTitle}>No hay locales registrados</Text>
                         <Text style={styles.emptySubtitle}>
                             Aún no tienes locales registrados para tu empresa.
@@ -233,7 +234,7 @@ const CompanyLocationsScreen = ({ onBack }) => {
                         </Text>
                         
                         <View style={styles.infoCard}>
-                            <Ionicons name="information-circle-outline" size={24} color="#C9A961" />
+                            <MinimalistIcons name="help" size={24} color="#C9A961" />
                             <View style={styles.infoContent}>
                                 <Text style={styles.infoTitle}>¿Cómo se añaden los locales?</Text>
                                 <Text style={styles.infoText}>
@@ -249,7 +250,7 @@ const CompanyLocationsScreen = ({ onBack }) => {
                 ) : (
                     <>
                         <View style={styles.summaryCard}>
-                            <Ionicons name="stats-chart" size={24} color="#C9A961" />
+                            <MinimalistIcons name="help" size={24} color="#C9A961" />
                             <View style={styles.summaryContent}>
                                 <Text style={styles.summaryTitle}>Resumen de Locales</Text>
                                 <Text style={styles.summaryText}>

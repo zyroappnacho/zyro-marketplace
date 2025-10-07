@@ -1088,6 +1088,25 @@ const MinimalistIcons = ({ name, size = 24, color = '#888888', strokeWidth = 2, 
                     strokeLinecap="round"
                 />
             </Svg>
+        ),
+
+        refresh: (
+            <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+                <Path 
+                    d="M23 4V10H17" 
+                    stroke={activeColor} 
+                    strokeWidth={activeStrokeWidth} 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                />
+                <Path 
+                    d="M20.49 15A9 9 0 1 1 5.64 5.64L17 10" 
+                    stroke={activeColor} 
+                    strokeWidth={activeStrokeWidth} 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                />
+            </Svg>
         )
     };
 
