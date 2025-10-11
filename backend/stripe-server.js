@@ -22,8 +22,9 @@ app.use(cors({
   credentials: true
 }));
 
+// Middleware especial para webhooks - debe ir antes del JSON parser
+app.use('/webhook/stripe', express.raw({ type: 'application/json' }));
 app.use(express.json());
-app.use(express.raw({ type: 'application/webhook+json' }));
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -374,8 +375,8 @@ app.post('/api/stripe/customer-portal', async (req, res) => {
   }
 });
 
-// Webhook para eventos de Stripe
-app.post('/api/stripe/webhook', async (req, res) => {
+// Webhook para eventos de Stripe - Endpoint correcto para Render
+app.post('/webhook/stripe', async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
 
@@ -769,7 +770,7 @@ app.listen(PORT, () => {
   console.log(`✅ Puerto: ${PORT}`);
   console.log(`✅ Stripe configurado: ${process.env.STRIPE_SECRET_KEY ? 'Sí' : 'No'}`);
   console.log(`✅ CORS habilitado para React Native`);
-  console.log(`✅ Webhooks endpoint: /api/stripe/webhook`);
+  console.log(`✅ Webhooks endpoint: /webhook/stripe`);
   console.log('\n🔗 Endpoints disponibles:');
   console.log(`   GET  /health`);
   console.log(`   POST /api/stripe/create-checkout-session`);
@@ -777,7 +778,7 @@ app.listen(PORT, () => {
   console.log(`   POST /api/stripe/subscription-info`);
   console.log(`   POST /api/stripe/cancel-subscription`);
   console.log(`   POST /api/stripe/customer-portal`);
-  console.log(`   POST /api/stripe/webhook`);
+  console.log(`   POST /webhook/stripe`);
   console.log(`   GET  /api/stripe/prices`);
   console.log(`   POST /api/stripe/create-customer`);
   console.log('\n🎯 Listo para recibir solicitudes de pago');
