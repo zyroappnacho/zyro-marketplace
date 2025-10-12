@@ -21,13 +21,13 @@ const priceIds = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'stripe-p
 
 // Middleware
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
+  origin: process.env.NODE_ENV === 'production'
     ? [
-        'https://zyromarketplace.com', 
-        'https://www.zyromarketplace.com',
-        /\.onrender\.com$/,  // Permitir dominios de Render
-        /\.vercel\.app$/     // Permitir dominios de Vercel
-      ]
+      'https://zyromarketplace.com',
+      'https://www.zyromarketplace.com',
+      /\.onrender\.com$/,  // Permitir dominios de Render
+      /\.vercel\.app$/     // Permitir dominios de Vercel
+    ]
     : ['http://localhost:3000', 'http://localhost:19006', 'exp://192.168.1.100:19000'],
   credentials: true
 }));
@@ -248,7 +248,7 @@ app.post('/api/stripe/subscription-info', async (req, res) => {
     const { customer_id, subscription_id } = req.body;
 
     let subscriptions;
-    
+
     if (subscription_id) {
       const subscription = await stripeClient.subscriptions.retrieve(subscription_id, {
         expand: ['items.data.price.product', 'customer', 'latest_invoice']
@@ -269,7 +269,7 @@ app.post('/api/stripe/subscription-info', async (req, res) => {
       const startDate = new Date(sub.created * 1000);
       const cancelDate = sub.cancel_at ? new Date(sub.cancel_at * 1000) : null;
       const currentPeriodEnd = new Date(sub.current_period_end * 1000);
-      
+
       const totalDuration = durationMonths * 30 * 24 * 60 * 60 * 1000;
       const elapsed = Date.now() - startDate.getTime();
       const progress = Math.min((elapsed / totalDuration) * 100, 100);
@@ -311,46 +311,76 @@ app.post('/api/stripe/subscription-info', async (req, res) => {
   }
 });
 
+// Endpoint GET para testing del webhook
+app.get('/webhook/stripe', (req, res) => {
+  res.json({
+    message: 'Webhook endpoint is active',
+    status: 'ready',
+    method: 'POST required for Stripe webhooks',
+    timestamp: new Date().toISOString(),
+    info: 'This endpoint receives Stripe webhook events via POST requests'
+  });
+});
+
 // Webhook para eventos de Stripe - Endpoint correcto para Render
 app.post('/webhook/stripe', async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
 
+  // Log inicial para debugging
+  console.log('📨 Webhook recibido:', {
+    headers: req.headers['stripe-signature'] ? 'Signature present' : 'No signature',
+    bodyType: typeof req.body,
+    bodyLength: req.body ? req.body.length : 0,
+    timestamp: new Date().toISOString()
+  });
+
   try {
     event = stripeClient.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    console.log('✅ Webhook verificado exitosamente:', event.type);
   } catch (err) {
-    console.error('❌ Error verificando webhook:', err.message);
+    console.error('❌ Error verificando webhook:', {
+      error: err.message,
+      signature: sig ? 'Present' : 'Missing',
+      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET ? 'Configured' : 'Missing',
+      timestamp: new Date().toISOString()
+    });
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
-
-  console.log('📨 Webhook recibido:', event.type);
 
   // Manejar diferentes tipos de eventos
   switch (event.type) {
     case 'checkout.session.completed':
       const session = event.data.object;
       console.log('✅ Checkout completado:', session.id);
-      
+
       if (session.mode === 'subscription') {
         await handleSubscriptionCreated(session);
       }
       break;
-    
+
     case 'customer.subscription.created':
       const newSubscription = event.data.object;
       console.log('🔄 Suscripción creada:', newSubscription.id);
       break;
-    
+
     case 'invoice.payment_succeeded':
       const invoice = event.data.object;
-      console.log('💰 Pago de factura exitoso:', invoice.id);
+      console.log('💰 Pago de factura exitoso:', {
+        invoice_id: invoice.id,
+        customer_id: invoice.customer,
+        amount: invoice.amount_paid / 100,
+        currency: invoice.currency,
+        subscription_id: invoice.subscription
+      });
+      await handleInvoicePaymentSucceeded(invoice);
       break;
-    
+
     case 'invoice.payment_failed':
       const failedInvoice = event.data.object;
       console.log('❌ Pago de factura fallido:', failedInvoice.id);
       break;
-    
+
     default:
       console.log(`🔔 Evento no manejado: ${event.type}`);
   }
@@ -362,7 +392,7 @@ async function handleSubscriptionCreated(session) {
   try {
     const subscription = await stripeClient.subscriptions.retrieve(session.subscription);
     const durationMonths = parseInt(subscription.metadata.duration_months || '12');
-    
+
     console.log('📅 Suscripción creada exitosamente:', {
       subscription_id: subscription.id,
       duration_months: durationMonths,
@@ -372,6 +402,44 @@ async function handleSubscriptionCreated(session) {
 
   } catch (error) {
     console.error('❌ Error procesando suscripción creada:', error);
+  }
+}
+
+async function handleInvoicePaymentSucceeded(invoice) {
+  try {
+    console.log('💳 Procesando pago exitoso de factura:', {
+      invoice_id: invoice.id,
+      customer_id: invoice.customer,
+      amount: invoice.amount_paid / 100,
+      currency: invoice.currency,
+      subscription_id: invoice.subscription,
+      billing_reason: invoice.billing_reason
+    });
+
+    // Si es el primer pago de una suscripción
+    if (invoice.billing_reason === 'subscription_create') {
+      console.log('🎉 Primer pago de suscripción completado');
+
+      // Aquí puedes agregar lógica para:
+      // - Activar la cuenta de la empresa
+      // - Enviar email de bienvenida
+      // - Actualizar estado en tu base de datos
+    }
+
+    // Si es un pago recurrente
+    if (invoice.billing_reason === 'subscription_cycle') {
+      console.log('🔄 Pago recurrente de suscripción completado');
+
+      // Aquí puedes agregar lógica para:
+      // - Extender el período de suscripción
+      // - Enviar confirmación de renovación
+      // - Actualizar métricas
+    }
+
+    return true;
+  } catch (error) {
+    console.error('❌ Error procesando pago de factura:', error);
+    return false;
   }
 }
 
@@ -393,22 +461,52 @@ app.use((error, req, res, next) => {
   });
 });
 
+// Sistema Keep-Alive para evitar suspensión en Render Free
+if (process.env.NODE_ENV === 'production') {
+  const keepAliveInterval = setInterval(() => {
+    // Auto-ping cada 14 minutos para mantener activo
+    const startTime = Date.now();
+
+    // Hacer request interno al health endpoint
+    const http = require('http');
+    const req = http.get(`http://localhost:${PORT}/health`, (res) => {
+      const responseTime = Date.now() - startTime;
+      console.log(`🏓 Keep-alive ping: ${res.statusCode} - ${responseTime}ms`);
+    });
+
+    req.on('error', (err) => {
+      console.log('⚠️  Keep-alive ping error:', err.message);
+    });
+
+    req.setTimeout(10000); // 10 segundos timeout
+  }, 14 * 60 * 1000); // 14 minutos
+
+  // Limpiar interval al cerrar
+  process.on('SIGTERM', () => {
+    clearInterval(keepAliveInterval);
+  });
+
+  process.on('SIGINT', () => {
+    clearInterval(keepAliveInterval);
+  });
+}
+
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log('\n🚀 SERVIDOR STRIPE OPTIMIZADO INICIADO');
-  console.log('=' .repeat(50));
+  console.log('='.repeat(50));
   console.log(`✅ Puerto: ${PORT}`);
   console.log(`✅ Entorno: ${process.env.NODE_ENV}`);
   console.log(`✅ Stripe configurado: ${process.env.STRIPE_SECRET_KEY ? 'Sí' : 'No'}`);
   console.log(`✅ Precios cargados: ${Object.keys(priceIds).length}`);
   console.log(`✅ CORS habilitado para producción`);
   console.log(`✅ Webhooks endpoint: /webhook/stripe`);
-  
+
   console.log('\n💰 PRECIOS CONFIGURADOS:');
   Object.entries(priceIds).forEach(([key, config]) => {
     console.log(`   ${key}: ${config.price_id} (${config.amount / 100}€)`);
   });
-  
+
   console.log('\n🔗 Endpoints disponibles:');
   console.log(`   GET  /health`);
   console.log(`   GET  /api/stripe/price-config`);
@@ -416,10 +514,10 @@ app.listen(PORT, () => {
   console.log(`   POST /api/stripe/verify-payment`);
   console.log(`   POST /api/stripe/subscription-info`);
   console.log(`   POST /webhook/stripe`);
-  
+
   console.log('\n🎯 Listo para recibir solicitudes de pago');
   console.log('📱 Optimizado para producción con precios predefinidos');
-  console.log('=' .repeat(50));
+  console.log('='.repeat(50));
 });
 
 // Manejo de cierre graceful
